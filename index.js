@@ -17,9 +17,12 @@ app.use(cors());
 app.use(express.json());
 
 // HTTP route example
-app.get('/', (req, res) => {
+app.get('/check', (req, res) => {
   res.send('Hello, HTTP request!');
 });
+
+
+app.use('/auth',)
 
 // Socket.io connection
 io.on('connection', (socket) => {
