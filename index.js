@@ -8,7 +8,6 @@ const cors = require('cors');
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
-
 const PORT = process.env.PORT || 3000;
 
 // Enable CORS
@@ -36,7 +35,7 @@ io.on('connection', (socket) => {
 
   // Handle disconnection
   socket.on('disconnect', () => {
-    console.log('Client disconnected');
+    console.log('Client disconnected'); 
   });
 });
 
