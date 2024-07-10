@@ -10,21 +10,18 @@ const server = http.createServer(app);
 const io = socketIo(server);
 const PORT = process.env.PORT || 3000;
 
-const authRoutes=require("./routes/authRoutes/signup")
-
 // Enable CORS
 app.use(cors());
 
 // Use express.json()
 app.use(express.json());
 
-// HTTP route example
-app.get('/check', (req, res) => {
-  res.send('Hello, HTTP request!');
-});
-
-
+const authRoutes=require("./routes/authRoutes/signInSignUp")
 app.use('/auth',authRoutes);
+
+const profileRoutes=require("./routes/profileRoutes/entry");
+app.use('/profile',profileRoutes);
+
 
 // Socket.io connection
 io.on('connection', (socket) => {
