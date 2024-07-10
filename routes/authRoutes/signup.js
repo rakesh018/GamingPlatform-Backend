@@ -7,7 +7,7 @@ const otpGenerator = require("otp-generator");
 const { body, validationResult } = require("express-validator");
 
 const User = require("../../models/userModels");
-const OTP = require("../../models/otpModel"); // Ensure you have this model defined
+const OTP = require("../../models/otpModel");
 
 
 // Route for user signup and OTP generation
@@ -118,7 +118,7 @@ router.post('/signup/validate-otp', [
         }
 
         // Generate a token with userId inside token
-        const token = jwt.sign({ userId: updatedUser._id }, process.env.JWT_SECRET);
+        const token = jwt.sign({ userId: updatedUser._id }, process.env.JWT_SECRET,{expiresIn:'7d'});
 
         //Delete OTP from database
         await OTP.deleteOne({ _id: foundOTP._id });
@@ -127,21 +127,61 @@ router.post('/signup/validate-otp', [
 
     } catch (error) {
         console.error('Error during OTP validation:', error);
-
-        let errorMessage = 'Failed to validate OTP';
-        let status = 500;
-
-
         const parsedError = JSON.parse(error.message);
-        if (parsedError.status) status = parsedError.status;
-        if (parsedError.message) errorMessage = parsedError.message;
-
-
-        res.status(status).json({ error: errorMessage });
+        res.status(parsedError.status).json({ error: parsedError.message });
     }
 });
 
-module.exports = router;
+
+router.post('/signin', [
+    // Validate and sanitize inputs
+    body('emailOrPhone').notEmpty().withMessage('EMAIL OR PHONE REQUIRED ERROR'),
+    body('password').notEmpty().withMessage('PASSWORD NOT PRESENT ERROR'),
+], async (req, res) => {
+    try {
+        // Handle validation errors
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            throw new Error(JSON.stringify({ status: 400, message: errors.array()[0].msg }));
+        }
+
+        const { emailOrPhone, password } = req.body;
+
+        // Check if the user exists by email or phone number
+        const user = await User.findOne({
+            $or: [
+                { email: emailOrPhone },
+                { phone: emailOrPhone }
+            ]
+        });
+
+        if (!user) {
+            throw new Error(JSON.stringify({ status: 404, message: 'USER NOT FOUND ERROR' }));
+        }
+
+        // Validate password
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
+            throw new Error(JSON.stringify({ status: 401, message: 'INVALID PASSWORD ERROR' }));
+        }
+
+        // Generate JWT token with expiry of 7 days
+        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+        res.status(200).json({ message: 'Sign-in successful', token });
+
+    } catch (error) {
+        console.error('Error during sign-in:', error);
+
+        const parsedError = JSON.parse(error.message);
+        res.status(parsedError.status).json({ error: parsedError.message });
+    }
+});
+
+
 
 
 module.exports = router;
+
+
+
