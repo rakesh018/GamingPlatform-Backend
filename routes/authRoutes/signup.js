@@ -60,13 +60,13 @@ router.post('/signup/get-otp', [
 
         // // Send OTP via SMS
         const ReceiverUrl = `${process.env.RENFLAIR_URL}&PHONE=${phoneNumber}&OTP=${otpCode}`;
-        const OTPresponse=await axios.get(ReceiverUrl);
-        if(OTPresponse.data.status!=='SUCCESS'){
-            throw new Error(JSON.stringify({status:500,message:"OTP SENDING ERROR"}));
+        const OTPresponse = await axios.get(ReceiverUrl);
+        if (OTPresponse.data.status !== 'SUCCESS') {
+            throw new Error(JSON.stringify({ status: 500, message: "OTP SENDING ERROR" }));
         }
 
-         // Save OTP to database
-         const newOTP = new OTP({
+        // Save OTP to database
+        const newOTP = new OTP({
             userId: savedUser._id, // Associate OTP with the newly created user
             code: otpCode.toString(),
             purpose: 'registration', // Specify the purpose
@@ -77,8 +77,8 @@ router.post('/signup/get-otp', [
         if (!savedOTP) {
             throw new Error(JSON.stringify({ status: 500, message: 'FAILED TO SAVE OTP ERROR' }));
         }
-        
-        res.status(200).json({ message: 'User registered successfully. OTP sent to user.',userId:savedUser._id });
+
+        res.status(200).json({ message: 'User registered successfully. OTP sent to user.', userId: savedUser._id });
 
     } catch (error) {
         console.error('Error during signup and OTP generation:', error);
@@ -121,7 +121,7 @@ router.post('/signup/validate-otp', [
         const token = jwt.sign({ userId: updatedUser._id }, process.env.JWT_SECRET);
 
         //Delete OTP from database
-        await OTP.deleteOne({_id:foundOTP._id});
+        await OTP.deleteOne({ _id: foundOTP._id });
 
         res.status(200).json({ message: 'OTP validated successfully', token });
 
@@ -131,13 +131,11 @@ router.post('/signup/validate-otp', [
         let errorMessage = 'Failed to validate OTP';
         let status = 500;
 
-        try {
-            const parsedError = JSON.parse(error.message);
-            if (parsedError.status) status = parsedError.status;
-            if (parsedError.message) errorMessage = parsedError.message;
-        } catch (e) {
-            // error is not JSON formatted, use default error message and status
-        }
+
+        const parsedError = JSON.parse(error.message);
+        if (parsedError.status) status = parsedError.status;
+        if (parsedError.message) errorMessage = parsedError.message;
+
 
         res.status(status).json({ error: errorMessage });
     }
