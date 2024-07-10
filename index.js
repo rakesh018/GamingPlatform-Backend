@@ -10,6 +10,8 @@ const server = http.createServer(app);
 const io = socketIo(server);
 const PORT = process.env.PORT || 3000;
 
+const authRoutes=require("./routes/authRoutes/signup")
+
 // Enable CORS
 app.use(cors());
 
@@ -22,7 +24,7 @@ app.get('/check', (req, res) => {
 });
 
 
-app.use('/auth',)
+app.use('/auth',authRoutes);
 
 // Socket.io connection
 io.on('connection', (socket) => {
