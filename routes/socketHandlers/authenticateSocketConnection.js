@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 
-const authenticateToken = (socket, next) => {
+const authenticateSocketConnection = (socket, next) => {
   const token = socket.handshake.auth.token.split(' ')[1];
   if (token == null) {
     return next(new Error('Authentication error'));
@@ -15,4 +15,4 @@ const authenticateToken = (socket, next) => {
   });
 };
 
-module.exports = authenticateToken;
+module.exports = authenticateSocketConnection;

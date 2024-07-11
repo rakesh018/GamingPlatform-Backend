@@ -27,7 +27,7 @@ const authRoutes = require("./routes/authRoutes/signInSignUp");
 app.use('/auth', authRoutes);
 
 const profileRoutes = require("./routes/profileRoutes/entry");
-const authenticateToken = require('./routes/socketHandlers/socketAuthenticate');
+const authenticateSocketConnection = require('./routes/socketHandlers/authenticateSocketConnection');
 app.use('/profile', profileRoutes);
 
 app.post('/webhook', (req, res) => {
@@ -36,7 +36,7 @@ app.post('/webhook', (req, res) => {
 });
 
 // Socket.io connection
-io.use(authenticateToken);//only authorized users must be able to get a socket connection
+io.use(authenticateSocketConnection);//only authorized users must be able to get a socket connection
 io.on('connection', (socket) => {
   
   console.log('New client connected : ',socket.userId);

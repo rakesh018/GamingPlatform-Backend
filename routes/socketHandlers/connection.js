@@ -1,5 +1,5 @@
 const socketIo = require('socket.io');
-const authenticateToken = require('./socketAuthenticate');
+const authenticateToken = require('./authenticateSocketConnection');
 
 const initSocket = (server) => {
   const io = socketIo(server, {
