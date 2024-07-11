@@ -8,7 +8,12 @@
   <h1>Socket.io Client</h1>
   <p>Open the console to see the logs.</p>
   <script>
-    const socket = io('http://localhost:3000');
+   const token=localStorage.getItem('token');
+   const socket = io('http://localhost:3000', {
+      auth: {
+        token: `Bearer ${token}`
+      }
+    });
 
     socket.on('connect', () => {
       console.log('Connected to socket server');
