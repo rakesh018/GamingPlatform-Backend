@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Socket.io Test</title>
+  <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <h1>Socket.io Client</h1>
+  <p>Open the console to see the logs.</p>
+  <script>
+    const socket = io('http://localhost:3000');
+
+    socket.on('connect', () => {
+      console.log('Connected to socket server');
+    });
+
+    socket.on('message', (msg) => {
+      console.log('Received message:', msg);
+    });
+
+    socket.emit('clientMessage', 'Hello from client!');
+
+    socket.on('disconnect', () => {
+      console.log('Disconnected from server');
+    });
+  </script>
+</body>
+</html>
