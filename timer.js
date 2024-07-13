@@ -36,14 +36,6 @@ const stopTimer = (gameName, roundIndex) => {
   timer.remainingTime = 0;
 };
 
-const calculateResults = (io, gameName, roundIndex) => {
-  // Calculate game results here
-  io.emit("gameResults", {
-    gameName,
-    roundIndex,
-    message: "Game results calculated",
-  });
-};
 
 module.exports = {
   initializeTimers,
