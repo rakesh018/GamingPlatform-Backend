@@ -1,23 +1,24 @@
-const socketIo = require('socket.io');
-const authenticateToken = require('./authenticateSocketConnection');
+const { emitSocketMessage } = require("./socketMessage");
 
-const initSocket = (server) => {
-  const io = socketIo(server, {
-    cors: {
-      origin: "*", // Allow only your frontend origin
-      methods: ["GET", "POST"],
-      allowedHeaders: ["Authorization"],
-      credentials: true
-    }
+exports.socketHandler=(socket) => {
+  
+  console.log('New client connected : ',socket.userId);
+
+  // Listen for events from the client
+  socket.on('clientMessage', (msg) => {
+    console.log('Message from client:', msg);
   });
 
-  io.use(authenticateToken);
+  socket.on('startGame',(message)=>{
+    const {roundIndex,gameName,betAmount}=message;
+    parsedBetAmount=parseInt(betAmount,10);
+    console.log(gameName,roundIndex,parsedBetAmount);
+    emitSocketMessage(`Received bet`,socket);
+  })
 
-  io.on('connection', (socket) => {
-    socket.emit("message",'Hello client');
+
+  // Handle disconnection
+  socket.on('disconnect', () => {
+    console.log('Client disconnected');
   });
-
-  return io;
-};
-
-module.exports = initSocket;
+}

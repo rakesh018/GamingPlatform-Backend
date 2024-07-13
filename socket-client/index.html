@@ -7,9 +7,32 @@
 <body>
   <h1>Socket.io Client</h1>
   <p>Open the console to see the logs.</p>
+
+  <h2>Coin Flip</h2>
+  <input type="number" id="betAmount1" placeholder="Enter bet amount">
+  <button onclick="startGame('coinFlip', 0)">Round 1 (1 minute)</button>
+  <button onclick="startGame('coinFlip', 1)">Round 2 (3 minutes)</button>
+  <button onclick="startGame('coinFlip', 2)">Round 3 (5 minutes)</button>
+  <button onclick="startGame('coinFlip', 3)">Round 4 (10 minutes)</button>
+  <div id="timercoinFlip0"></div>
+  <div id="timercoinFlip1"></div>
+  <div id="timercoinFlip2"></div>
+  <div id="timercoinFlip3"></div>
+
+  <h2>Stock Trader</h2>
+  <input type="number" id="betAmount2" placeholder="Enter bet amount">
+  <button onclick="startGame('stockTrader', 0)">Round 1 (1 minute)</button>
+  <button onclick="startGame('stockTrader', 1)">Round 2 (3 minutes)</button>
+  <button onclick="startGame('stockTrader', 2)">Round 3 (5 minutes)</button>
+  <button onclick="startGame('stockTrader', 3)">Round 4 (10 minutes)</button>
+  <div id="timerstockTrader0"></div>
+  <div id="timerstockTrader1"></div>
+  <div id="timerstockTrader2"></div>
+  <div id="timerstockTrader3"></div>
+
   <script>
-   const token=localStorage.getItem('token');
-   const socket = io('http://localhost:3000', {
+    const token = localStorage.getItem('token');
+    const socket = io('http://localhost:3000', {
       auth: {
         token: `Bearer ${token}`
       }
@@ -19,7 +42,7 @@
       console.log('Connected to socket server');
     });
 
-    socket.on('message', (msg) => {
+    socket.on('MESSAGE', (msg) => {
       console.log('Received message:', msg);
     });
 
@@ -28,6 +51,39 @@
     socket.on('disconnect', () => {
       console.log('Disconnected from server');
     });
+
+    socket.on('timerUpdate', (data) => {
+      const { gameName, roundIndex, newTimer } = data;
+      const timerElement = document.getElementById(`timer${gameName}${roundIndex}`);
+      timerElement.innerHTML = `Round ${roundIndex + 1}: ${newTimer} remaining`;
+    });
+
+    socket.on('timerEnd', (data) => {
+      const { gameName, roundIndex, duration } = data;
+      const timerElement = document.getElementById(`timer${gameName}${roundIndex}`);
+      timerElement.innerHTML = `Round ${roundIndex + 1} of ${gameName} has ended. Duration was ${duration} minutes.`;
+    });
+
+    socket.on('gameResults', (data) => {
+      console.log('Game results:', data);
+    });
+
+    socket.on('roundFreeze', (data) => {
+      const { gameName, roundIndex } = data;
+      const timerElement = document.getElementById(`timer${gameName}${roundIndex}`);
+      timerElement.innerHTML = `Round ${roundIndex + 1}: Round Freeze!`;
+    });
+
+    function startGame(gameName, roundIndex) {
+      const betAmount = document.getElementById(`betAmount${gameName === 'coinFlip' ? 1 : 2}`).value;
+      if (!betAmount || betAmount <= 0) {
+        alert('Please enter a valid bet amount');
+        return;
+      }
+
+      console.log(`Game: ${gameName}, Round ${roundIndex + 1}, Bet Amount: ${betAmount}`);
+      socket.emit('startGame', { gameName, roundIndex, betAmount });
+    }
   </script>
 </body>
 </html>

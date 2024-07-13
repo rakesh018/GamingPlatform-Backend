@@ -28,6 +28,8 @@ app.use('/auth', authRoutes);
 
 const profileRoutes = require("./routes/profileRoutes/entry");
 const authenticateSocketConnection = require('./routes/socketHandlers/authenticateSocketConnection');
+const { socketHandler } = require('./routes/socketHandlers/connection');
+const { initializeTimers } = require('./timer');
 app.use('/profile', profileRoutes);
 
 app.post('/webhook', (req, res) => {
@@ -37,24 +39,8 @@ app.post('/webhook', (req, res) => {
 
 // Socket.io connection
 io.use(authenticateSocketConnection);//only authorized users must be able to get a socket connection
-io.on('connection', (socket) => {
-  
-  console.log('New client connected : ',socket.userId);
-
-  // Emit a message to the client
-  socket.emit('message', 'Hello, WebSocket connection!');
-
-  // Listen for events from the client
-  socket.on('clientMessage', (msg) => {
-    console.log('Message from client:', msg);
-  });
-
-  // Handle disconnection
-  socket.on('disconnect', () => {
-    console.log('Client disconnected');
-  });
-});
-
+io.on('connection', socketHandler);
+initializeTimers(io);
 // Start the server
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
