@@ -1,0 +1,31 @@
+const processTimers = require("./processTimers");
+const gameTimers = {
+  coinFlip: [
+    { duration: 1, remainingTime: 1 * 0, GID: 0 }, // Round 1
+    { duration: 3, remainingTime: 3 * 0, GID: 0 }, // Round 2
+    { duration: 5, remainingTime: 5 * 0, GID: 0 }, // Round 3
+    { duration: 10, remainingTime: 10 * 0, GID: 0 }, // Round 4
+  ],
+  stockTrader: [
+    { duration: 1, remainingTime: 1 * 0, GID: 0 }, // Round 1
+    { duration: 3, remainingTime: 3 * 0, GID: 0 }, // Round 2
+    { duration: 5, remainingTime: 5 * 0, GID: 0 }, // Round 3
+    { duration: 10, remainingTime: 10 * 0, GID: 0 }, // Round 4
+  ],
+};
+
+const initializeTimers = (io) => {
+  const timerFunction = async () => {
+    try {
+      await processTimers(io, gameTimers);
+    } catch (error) {
+      console.error("Error in processTimers:", error);
+    }
+    setTimeout(timerFunction, 1000); // Schedule next execution
+  };
+  timerFunction(); // Initial call to start the cycle
+};
+
+module.exports = {
+  initializeTimers,
+};

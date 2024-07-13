@@ -64,10 +64,6 @@
       timerElement.innerHTML = `Round ${roundIndex + 1} of ${gameName} has ended. Duration was ${duration} minutes.`;
     });
 
-    socket.on('gameResults', (data) => {
-      console.log('Game results:', data);
-    });
-
     socket.on('roundFreeze', (data) => {
       const { gameName, roundIndex } = data;
       const timerElement = document.getElementById(`timer${gameName}${roundIndex}`);

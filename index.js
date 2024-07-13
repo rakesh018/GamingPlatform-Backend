@@ -29,7 +29,7 @@ app.use('/auth', authRoutes);
 const profileRoutes = require("./routes/profileRoutes/entry");
 const authenticateSocketConnection = require('./routes/socketHandlers/authenticateSocketConnection');
 const { socketHandler } = require('./routes/socketHandlers/connection');
-const { initializeTimers } = require('./timer');
+const { initializeTimers } = require('./routes/gameLogic/timer');
 app.use('/profile', profileRoutes);
 
 app.post('/webhook', (req, res) => {
