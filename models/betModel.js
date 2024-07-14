@@ -10,4 +10,5 @@ const betSchema=new mongoose.Schema({
     isWin:{type:Boolean,required:true},
 })
 
+
 module.exports=mongoose.model('Bet',betSchema);
