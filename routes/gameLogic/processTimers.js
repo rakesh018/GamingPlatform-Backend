@@ -5,8 +5,9 @@ const processTimers = async (io,gameTimers) => {
     for (const gameName in gameTimers) {
       for (let roundIndex = 0; roundIndex < gameTimers[gameName].length; roundIndex++) {
         const timer = gameTimers[gameName][roundIndex];
+        const roundDuration=timer.duration;
         if (timer.remainingTime <= 0) {
-          io.emit("roundFreeze", { gameName, roundIndex });
+          io.emit("roundFreeze", { gameName, roundDuration });
           if (timer.GID) {
             console.log(`${timer.GID} round ended`);
           }
@@ -22,7 +23,7 @@ const processTimers = async (io,gameTimers) => {
         } else {
           timer.remainingTime -= 1; // Decrement by 2 seconds
           const newTimer = timer.remainingTime;
-          io.emit("timerUpdate", { gameName, roundIndex, newTimer });
+          io.emit("timerUpdate", { gameName, roundDuration, newTimer });
         }
       }
     }

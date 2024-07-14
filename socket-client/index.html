@@ -55,9 +55,7 @@
     socket.on('timerUpdate', (data) => {
       const { gameName, roundDuration, newTimer } = data;
       const timerElement = document.getElementById(`timer${gameName}${roundDuration}`);
-      const minutes = Math.floor(newTimer / 60);
-      const seconds = newTimer % 60;
-      timerElement.innerHTML = `Round (${roundDuration} minutes): ${minutes}m ${seconds}s remaining`;
+      timerElement.innerHTML = `Round (${roundDuration} minutes): ${newTimer} remaining`;
     });
 
     socket.on('timerEnd', (data) => {
@@ -95,8 +93,8 @@
         if (response.ok) {
           console.log('Bet placed successfully:', data);
         } else {
-          console.error('Error placing bet:', data.message);
-          alert(`Error placing bet: ${data.message}`);
+          console.error('Error placing bet:', data.error);
+          alert(`Error placing bet: ${data.error}`);
         }
       } catch (error) {
         console.error('Network error:', error);
