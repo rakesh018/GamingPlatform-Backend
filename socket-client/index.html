@@ -10,25 +10,25 @@
 
   <h2>Coin Flip</h2>
   <input type="number" id="betAmount1" placeholder="Enter bet amount">
-  <button onclick="startGame('coinFlip', 0)">Round 1 (1 minute)</button>
-  <button onclick="startGame('coinFlip', 1)">Round 2 (3 minutes)</button>
-  <button onclick="startGame('coinFlip', 2)">Round 3 (5 minutes)</button>
-  <button onclick="startGame('coinFlip', 3)">Round 4 (10 minutes)</button>
-  <div id="timercoinFlip0"></div>
+  <button onclick="startGame('coinFlip', 1)">Round 1 (1 minute)</button>
+  <button onclick="startGame('coinFlip', 3)">Round 2 (3 minutes)</button>
+  <button onclick="startGame('coinFlip', 5)">Round 3 (5 minutes)</button>
+  <button onclick="startGame('coinFlip', 10)">Round 4 (10 minutes)</button>
   <div id="timercoinFlip1"></div>
-  <div id="timercoinFlip2"></div>
   <div id="timercoinFlip3"></div>
+  <div id="timercoinFlip5"></div>
+  <div id="timercoinFlip10"></div>
 
   <h2>Stock Trader</h2>
   <input type="number" id="betAmount2" placeholder="Enter bet amount">
-  <button onclick="startGame('stockTrader', 0)">Round 1 (1 minute)</button>
-  <button onclick="startGame('stockTrader', 1)">Round 2 (3 minutes)</button>
-  <button onclick="startGame('stockTrader', 2)">Round 3 (5 minutes)</button>
-  <button onclick="startGame('stockTrader', 3)">Round 4 (10 minutes)</button>
-  <div id="timerstockTrader0"></div>
+  <button onclick="startGame('stockTrader', 1)">Round 1 (1 minute)</button>
+  <button onclick="startGame('stockTrader', 3)">Round 2 (3 minutes)</button>
+  <button onclick="startGame('stockTrader', 5)">Round 3 (5 minutes)</button>
+  <button onclick="startGame('stockTrader', 10)">Round 4 (10 minutes)</button>
   <div id="timerstockTrader1"></div>
-  <div id="timerstockTrader2"></div>
   <div id="timerstockTrader3"></div>
+  <div id="timerstockTrader5"></div>
+  <div id="timerstockTrader10"></div>
 
   <script>
     const token = localStorage.getItem('token');
@@ -53,32 +53,55 @@
     });
 
     socket.on('timerUpdate', (data) => {
-      const { gameName, roundIndex, newTimer } = data;
-      const timerElement = document.getElementById(`timer${gameName}${roundIndex}`);
-      timerElement.innerHTML = `Round ${roundIndex + 1}: ${newTimer} remaining`;
+      const { gameName, roundDuration, newTimer } = data;
+      const timerElement = document.getElementById(`timer${gameName}${roundDuration}`);
+      const minutes = Math.floor(newTimer / 60);
+      const seconds = newTimer % 60;
+      timerElement.innerHTML = `Round (${roundDuration} minutes): ${minutes}m ${seconds}s remaining`;
     });
 
     socket.on('timerEnd', (data) => {
-      const { gameName, roundIndex, duration } = data;
-      const timerElement = document.getElementById(`timer${gameName}${roundIndex}`);
-      timerElement.innerHTML = `Round ${roundIndex + 1} of ${gameName} has ended. Duration was ${duration} minutes.`;
+      const { gameName, roundDuration, duration } = data;
+      const timerElement = document.getElementById(`timer${gameName}${roundDuration}`);
+      timerElement.innerHTML = `Round (${roundDuration} minutes) of ${gameName} has ended. Duration was ${duration} minutes.`;
     });
 
     socket.on('roundFreeze', (data) => {
-      const { gameName, roundIndex } = data;
-      const timerElement = document.getElementById(`timer${gameName}${roundIndex}`);
-      timerElement.innerHTML = `Round ${roundIndex + 1}: Round Freeze!`;
+      const { gameName, roundDuration } = data;
+      const timerElement = document.getElementById(`timer${gameName}${roundDuration}`);
+      timerElement.innerHTML = `Round (${roundDuration} minutes): Round Freeze!`;
     });
 
-    function startGame(gameName, roundIndex) {
+    async function startGame(gameName, roundDuration) {
       const betAmount = document.getElementById(`betAmount${gameName === 'coinFlip' ? 1 : 2}`).value;
       if (!betAmount || betAmount <= 0) {
         alert('Please enter a valid bet amount');
         return;
       }
 
-      console.log(`Game: ${gameName}, Round ${roundIndex + 1}, Bet Amount: ${betAmount}`);
-      socket.emit('startGame', { gameName, roundIndex, betAmount });
+      console.log(`Game: ${gameName}, Round Duration: ${roundDuration} minutes, Bet Amount: ${betAmount}`);
+
+      try {
+        const response = await fetch('http://localhost:3000/bets/makeBet', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ gameName, roundDuration, betAmount })
+        });
+        
+        const data = await response.json();
+        if (response.ok) {
+          console.log('Bet placed successfully:', data);
+        } else {
+          console.error('Error placing bet:', data.message);
+          alert(`Error placing bet: ${data.message}`);
+        }
+      } catch (error) {
+        console.error('Network error:', error);
+        alert('Network error. Please try again later.');
+      }
     }
   </script>
 </body>
