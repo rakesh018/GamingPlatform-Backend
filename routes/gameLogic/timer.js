@@ -28,7 +28,6 @@ const initializeTimers = (io) => {
 
 const getRemainingTime = (gameName, roundDuration) => {
   //Returns remaining time for a particular round
-  console.log(gameName,roundDuration);
   const game = gameTimers[gameName];
   if (!game) {
     throw new Error('Invalid game name');
@@ -38,11 +37,11 @@ const getRemainingTime = (gameName, roundDuration) => {
   if (!round) {
     throw new Error('Invalid round duration');
   }
-
   return round.remainingTime;
 };
 
 module.exports = {
   initializeTimers,
-  getRemainingTime
+  getRemainingTime,
+  gameTimers,
 };

@@ -10,6 +10,10 @@
 
   <h2>Coin Flip</h2>
   <input type="number" id="betAmount1" placeholder="Enter bet amount">
+  <select id="betChoice1">
+    <option value="head">Head</option>
+    <option value="tail">Tail</option>
+  </select>
   <button onclick="startGame('coinFlip', 1)">Round 1 (1 minute)</button>
   <button onclick="startGame('coinFlip', 3)">Round 2 (3 minutes)</button>
   <button onclick="startGame('coinFlip', 5)">Round 3 (5 minutes)</button>
@@ -21,6 +25,10 @@
 
   <h2>Stock Trader</h2>
   <input type="number" id="betAmount2" placeholder="Enter bet amount">
+  <select id="betChoice2">
+    <option value="up">Up</option>
+    <option value="down">Down</option>
+  </select>
   <button onclick="startGame('stockTrader', 1)">Round 1 (1 minute)</button>
   <button onclick="startGame('stockTrader', 3)">Round 2 (3 minutes)</button>
   <button onclick="startGame('stockTrader', 5)">Round 3 (5 minutes)</button>
@@ -72,12 +80,14 @@
 
     async function startGame(gameName, roundDuration) {
       const betAmount = document.getElementById(`betAmount${gameName === 'coinFlip' ? 1 : 2}`).value;
+      const betChoice = document.getElementById(`betChoice${gameName === 'coinFlip' ? 1 : 2}`).value;
+      
       if (!betAmount || betAmount <= 0) {
         alert('Please enter a valid bet amount');
         return;
       }
 
-      console.log(`Game: ${gameName}, Round Duration: ${roundDuration} minutes, Bet Amount: ${betAmount}`);
+      console.log(`Game: ${gameName}, Round Duration: ${roundDuration} minutes, Bet Amount: ${betAmount}, Bet Choice: ${betChoice}`);
 
       try {
         const response = await fetch('http://localhost:3000/bets/makeBet', {
@@ -86,7 +96,7 @@
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
           },
-          body: JSON.stringify({ gameName, roundDuration, betAmount })
+          body: JSON.stringify({ gameName, roundDuration, betAmount, betChoice })
         });
         
         const data = await response.json();

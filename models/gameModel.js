@@ -4,6 +4,8 @@ const gameSchema=new mongoose.Schema({
     gameType:{type:String,required:true,enum:['coinFlip','stockTrader']},
     roundDuration:{type:Number,required:true,enum:[1,3,5,10]},
     result:{type:Number,required:true,enum:[0,1,2],default:2},
+    betAmount0:{type:Number,required:true,default:0},
+    betAmount1:{type:Number,required:true,default:0}
 },{
     timestamps:true,
 });

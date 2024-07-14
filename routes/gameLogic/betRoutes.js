@@ -1,23 +1,36 @@
 //It is a http route
-const express=require('express');
-const validateToken = require('../../middlewares/tokenMiddleware');
-const validateBet  = require('../../middlewares/betMiddleware');
-const router=express.Router();
-const activeBets=require('./activeBetsQueues');
-router.post('/makeBet', validateToken, validateBet, async (req, res) => {
-    const { gameName, roundDuration, betAmount } = req.body;
+const express = require("express");
+const validateToken = require("../../middlewares/tokenMiddleware");
+const validateBet = require("../../middlewares/betMiddleware");
+const router = express.Router();
+const activeBets = require("./activeBetsQueues");
+const {gameTimers} = require("./timer");
 
-    // Check if the queue exists for the given game and round duration
-    const queue = activeBets[gameName][roundDuration];
-
-    // Add the bet to the respective queue
-    try {
-        await queue.add('bet', { betAmount });
-        res.status(200).json({ message: `Received ${betAmount} on ${gameName} for round ${roundDuration}` });
-    } catch (error) {
-        console.error('Error adding bet to queue:', error);
-        res.status(500).json({ message: 'Error processing your bet' });
-    }
+router.post("/makeBet", validateToken, validateBet, async (req, res) => {
+  const { gameName, roundDuration, betAmount, betChoice } = req.body;
+  const mappedChoice = mapChoice(gameName, betChoice);
+  const queue = activeBets[gameName][roundDuration];
+  const round=gameTimers[gameName].find(r=>r.duration===roundDuration);
+  round[`betAmount${mappedChoice}`] += parseFloat(betAmount);
+  // Add the bet to the respective queue
+  try {
+    await queue.add("bet", { betAmount, mappedChoice });
+    res.status(200).json({
+      message: `Received ${betAmount} on ${gameName} for round ${roundDuration}`,
+    });
+  } catch (error) {
+    console.error("Error adding bet to queue:", error);
+    res.status(500).json({ message: "Error processing your bet" });
+  }
 });
 
-module.exports=router;
+const mapChoice = (gameName, betChoice) => {
+  //Maps head to 1 , tail to 0 and up to 1 and down to 0
+  if (gameName === `coinFlip`) {
+    return betChoice === "head" ? 1 : 0;
+  } else {
+    return betChoice === "up" ? 1 : 0;
+  }
+};
+
+module.exports = router;
