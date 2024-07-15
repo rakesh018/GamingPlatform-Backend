@@ -1,14 +1,9 @@
 const { Queue } = require('bullmq');
+const redisConfig=require('../../configs/redisConfig')
 
 // Function to create a queue
 const createQueue = (name) => new Queue(name, {
-  connection: {
-    host: 'localhost',
-    port: 6379,
-    // Other optional parameters can be included here
-    // password: 'your_password',
-    // db: 0
-  }
+  connection: redisConfig
 });
 
 // Map to hold queues for each game and round duration

@@ -4,17 +4,19 @@ const validateToken = require("../../middlewares/tokenMiddleware");
 const validateBet = require("../../middlewares/betMiddleware");
 const router = express.Router();
 const activeBets = require("./activeBetsQueues");
-const {gameTimers} = require("./timer");
+const { gameTimers } = require("./timer");
 
 router.post("/makeBet", validateToken, validateBet, async (req, res) => {
-  const { gameName, roundDuration, betAmount, betChoice } = req.body;
+  let { gameName, roundDuration, betAmount, betChoice } = req.body;
+  const userId = req.userId; //from token validation
   const mappedChoice = mapChoice(gameName, betChoice);
+  betAmount=parseFloat(betAmount);
   const queue = activeBets[gameName][roundDuration];
-  const round=gameTimers[gameName].find(r=>r.duration===roundDuration);
+  const round = gameTimers[gameName].find((r) => r.duration === roundDuration);
   round[`betAmount${mappedChoice}`] += parseFloat(betAmount);
   // Add the bet to the respective queue
   try {
-    await queue.add("bet", { betAmount, mappedChoice });
+    await queue.add("bet", { betAmount, mappedChoice,userId });
     res.status(200).json({
       message: `Received ${betAmount} on ${gameName} for round ${roundDuration}`,
     });

@@ -8,8 +8,10 @@ const transferForPayout=async(gameName,roundDuration,GID,roundResult)=>{
         //Enqueue details of this into payout queue to process further
         await payouts.add('payout',{
             gameId:GID,
+            userId:job.data.userId,
             choice:job.data.mappedChoice,
             result:roundResult,
+            betAmount:job.data.betAmount,
             gameName,
             roundDuration
         });
