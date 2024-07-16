@@ -103,8 +103,8 @@
         if (response.ok) {
           console.log('Bet placed successfully:', data);
         } else {
-          console.error('Error placing bet:', data.error);
-          alert(`Error placing bet: ${data.error}`);
+          console.log('Error placing bet:', data);
+          alert(`Error placing bet: ${data}`);
         }
       } catch (error) {
         console.error('Network error:', error);

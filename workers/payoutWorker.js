@@ -6,15 +6,16 @@ const redisConfig = require("../configs/redisConfig");
 // Define the payout processing function
 const processPayoutJob = async (job) => {
   const { gameId, userId, choice, result, betAmount, gameName, roundDuration } =job.data;
-  //      string  string int   int    num     string    string
+  //      string  string    int   int        num     string    string
 
   //update user balance (only if he wins else no) and make an entry in bets table
-  console.log(typeof betAmount);
-  const userFromDB = await User.findById(userId);
+
   if (choice === result) {
     //win situation so update user balance
-    userFromDB.balance += process.env.ODDS * betAmount;
-    await userFromDB.save();
+    await User.findOneAndUpdate(
+      { _id: userId },
+      { $inc: { balance: process.env.ODDS * betAmount } }
+    );
   }
   //make a new entry in bets database
   const newBet = new Bet({
