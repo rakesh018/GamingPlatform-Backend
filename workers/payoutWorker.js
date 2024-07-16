@@ -1,4 +1,4 @@
-const { Worker, QueueScheduler } = require("bullmq");
+const { Worker } = require("bullmq");
 const Bet = require("../models/betModel");
 const User = require("../models/userModels");
 const redisConfig = require("../configs/redisConfig");

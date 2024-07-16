@@ -3,7 +3,7 @@ const express = require("express");
 const http = require("http");
 const socketIo = require("socket.io");
 const cors = require("cors");
-
+const bodyParser=require('body-parser')
 // Creation of server which could enable both http and socket requests
 const app = express();
 const server = http.createServer(app);
@@ -20,8 +20,11 @@ const PORT = process.env.PORT || 3000;
 // Enable CORS for Express
 app.use(cors());
 
-// Use express.json()
-app.use(express.json());
+// Parse application/json
+app.use(bodyParser.json());
+
+// Parse application/x-www-form-urlencoded (especially for webhook)
+app.use(bodyParser.urlencoded({ extended: true }));
 
 require("./workers/payoutWorker"); //listens to payout queue to process
 
@@ -37,8 +40,10 @@ app.use("/profile", profileRoutes);
 const betRoutes = require("./routes/gameLogic/betRoutes");
 app.use("/bets", betRoutes);
 
+
 app.post("/webhook", (req, res) => {
   console.log(req.body);
+  console.log(`webhook received successfully`);
   res.status(200).json({ message: "Webhook received successfully" });
 });
 

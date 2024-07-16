@@ -1,6 +1,7 @@
 //THIS CLIENT IS USED TO TEST THE SOCKET CONNECTION
 
 
+
 const io = require('socket.io-client');
 
 // Connect to the server

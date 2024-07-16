@@ -4,9 +4,10 @@ const axios = require("axios");
 const url = `https://upigatewaypro.in/api/check-order-status`;
 
 const payload = {
-  "user_token": `${process.env.API_TOKEN}`,
-  "order_id": "1853827",
+  user_token: `${process.env.UPI_TOKEN}`,
+  order_id: "1853873",
 };
+
 const checkStatus = async () => {
   try {
     const response = await axios.post(url, payload, {
