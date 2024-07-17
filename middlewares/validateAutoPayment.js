@@ -5,7 +5,7 @@ const {body,validationResult}=require('express-validator');
 const validateAutoPayment = [
     body("phoneNumber").isNumeric().withMessage("INVALID PHONE NUMBER ERROR"),
     body("amount")
-        .isFloat({ min: 10, max: 100000 })
+        .isFloat({ min: 1, max: 100000 })
         .withMessage("INVALID AMOUNT ERROR"),
     body("type")
         .isString()
