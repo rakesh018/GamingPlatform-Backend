@@ -1,15 +1,16 @@
 require("dotenv").config();
 const axios = require("axios");
 const url = `https://upigatewaypro.in/api/create-order`;
+
 let payload = {
-  customer_mobile: `8143541640`,
+  customer_mobile: `1234567890`,
   user_token: `${process.env.UPI_TOKEN}`,
   amount: `1`,
-  order_id: `1853876`,
+  order_id: `1853abc888`,
   redirect_url: "https://upii.instamedia.in",
   remark1: "testremark",
-};
-console.log(payload);
+};             
+//ABOVE IS THE FORMAT FOR PAYLOAD DATA
 const createOrder = async () => {
   try {
     const response = await axios.post(url, payload, {
@@ -31,4 +32,5 @@ const createOrder = async () => {
     throw error;
   }
 };
-createOrder();
+
+module.exports=createOrder;

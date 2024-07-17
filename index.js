@@ -3,7 +3,7 @@ const express = require("express");
 const http = require("http");
 const socketIo = require("socket.io");
 const cors = require("cors");
-const bodyParser=require('body-parser')
+const bodyParser = require("body-parser");
 // Creation of server which could enable both http and socket requests
 const app = express();
 const server = http.createServer(app);
@@ -26,26 +26,23 @@ app.use(bodyParser.json());
 // Parse application/x-www-form-urlencoded (especially for webhook)
 app.use(bodyParser.urlencoded({ extended: true }));
 
+const authenticateSocketConnection = require("./routes/socketHandlers/authenticateSocketConnection");
+const { socketHandler } = require("./routes/socketHandlers/connection");
+const { initializeTimers } = require("./routes/gameLogic/timer");
+
 require("./workers/payoutWorker"); //listens to payout queue to process
 
 const authRoutes = require("./routes/authRoutes/signInSignUp");
 app.use("/auth", authRoutes);
 
 const profileRoutes = require("./routes/profileRoutes/entry");
-const authenticateSocketConnection = require("./routes/socketHandlers/authenticateSocketConnection");
-const { socketHandler } = require("./routes/socketHandlers/connection");
-const { initializeTimers } = require("./routes/gameLogic/timer");
 app.use("/profile", profileRoutes);
 
 const betRoutes = require("./routes/gameLogic/betRoutes");
 app.use("/bets", betRoutes);
 
-
-app.post("/webhook", (req, res) => {
-  console.log(req.body);
-  console.log(`webhook received successfully`);
-  res.status(200).json({ message: "Webhook received successfully" });
-});
+const paymentRoutes = require("./routes/paymentGateway/entry");
+app.use("/payments", paymentRoutes);
 
 // Socket.io connection
 io.use(authenticateSocketConnection); //only authorized users must be able to get a socket connection
