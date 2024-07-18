@@ -8,7 +8,7 @@ const { body, validationResult } = require("express-validator");
 
 const User = require("../../models/userModels");
 const OTP = require("../../models/otpModel");
-
+const generateReferralCode=require('../../middlewares/generateReferralCodeMiddleware');
 
 // Route for user signup and OTP generation
 router.post('/signup/get-otp', [
@@ -16,7 +16,8 @@ router.post('/signup/get-otp', [
     body('email').isEmail().withMessage('INVALID EMAIL ERROR').normalizeEmail(),
     body('password').isLength({ min: 6 }).withMessage('PASSWORD LENGTH ERROR'),
     body('phoneNumber').isMobilePhone().withMessage('INVALID PHONE NUMBER ERROR'),
-], async (req, res) => {
+    body('referredBy').optional().isLength({min:7,max:7}).withMessage('INVALID REFERRAL CODE ERROR'),
+], generateReferralCode,async (req, res) => {
     try {
         // Handle validation errors
         const errors = validationResult(req);
@@ -35,13 +36,15 @@ router.post('/signup/get-otp', [
         }
 
         // Hash the password
-        const hashedPassword = await bcrypt.hash(password, 5); // Using 10 salt rounds
+        const hashedPassword = await bcrypt.hash(password, 5); // Using salt rounds
 
         // Create a new user in the database
         const newUser = new User({
             email,
             password: hashedPassword,
             phone: phoneNumber,
+            referralCode:req.referralCode,
+            referredBy:req?.referredByUser?req.referredByUser._id:null,
         });
 
         // Save the new user
@@ -110,7 +113,7 @@ router.post('/signup/validate-otp', [
             throw new Error(JSON.stringify({ status: 400, message: 'INVALID OR EXPIRED OTP ERROR' }));
         }
 
-        // Update user's isValidated status to true
+        // Update user's isVerified status to true
         const updatedUser = await User.findByIdAndUpdate(userId, { isVerified: true }, { new: true });
 
         if (!updatedUser) {
