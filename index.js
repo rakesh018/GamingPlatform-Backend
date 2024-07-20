@@ -44,6 +44,10 @@ app.use("/bets", betRoutes);
 const paymentRoutes = require("./routes/paymentGateway/entry");
 app.use("/payments", paymentRoutes);
 
+const adminRoutes=require('./routes/adminRoutes/entry');
+app.use("/admin",adminRoutes);
+
+
 // Socket.io connection
 io.use(authenticateSocketConnection); //only authorized users must be able to get a socket connection
 io.on("connection", socketHandler);
