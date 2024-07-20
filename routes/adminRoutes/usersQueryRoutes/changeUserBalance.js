@@ -9,6 +9,11 @@ const changeUserBalance = async (req, res) => {
         JSON.stringify({ status: 404, message: `INVALID USERID` })
       );
     }
+    if (newBalance < 0) {
+      throw new Error(
+        JSON.stringify({ status: 400, messaage: `INVALID BALANCE INPUT` })
+      );
+    }
     const updatedUser = await User.findOneAndUpdate(
       { _id: userId },
       { balance: newBalance },
