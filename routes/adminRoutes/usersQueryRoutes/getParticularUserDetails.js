@@ -3,7 +3,6 @@ const User = require("../../../models/userModels");
 const getParticularUserDetails = async (req, res) => {
   try {
     const userId = req.params?.userId;
-    console.log(userId);
     if (!userId) {
       throw new Error(
         JSON.stringify({ status: 404, message: `INVALID USERID` })
