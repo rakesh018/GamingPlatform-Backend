@@ -12,7 +12,9 @@ const validateToken = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.userId = decoded.userId;
     //also check if user is not banned
-    const isBanned = await User.findOne({ _id: req.userId }).select("isRestricted");
+    const isBanned = await User.findOne({ _id: req.userId }).select(
+      "isRestricted"
+    );
     if (isBanned.isRestricted) {
       return res.status(400).json({ error: `ACCESS DENIED` });
     } else {
