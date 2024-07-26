@@ -10,7 +10,7 @@ const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
     origin: "*", // Allow only your frontend origin or use "*" to allow all
-    methods: ["GET", "POST"],
+    methods: ["GET", "POST","OPTIONS","PUT"],
     allowedHeaders: ["Authorization"],
     credentials: true,
   },
@@ -56,3 +56,4 @@ initializeTimers(io);
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+

@@ -10,6 +10,7 @@ const manualDepositSchema = new mongoose.Schema(
     s3Key: {
       type: String,
       required: true,
+      default:null, //after getting confirmation from frontend, we can update this field
     },
     status: {
       type: String,

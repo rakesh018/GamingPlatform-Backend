@@ -38,6 +38,10 @@
   <div id="timerstockTrader5"></div>
   <div id="timerstockTrader10"></div>
 
+  <h2>Upload File</h2>
+  <input type="file" id="fileInput">
+  <button onclick="uploadFile()">Upload File</button>
+
   <script>
     const token = localStorage.getItem('token');
     const socket = io('http://localhost:3000', {
@@ -106,6 +110,77 @@
           console.log('Error placing bet:', data);
           alert(`Error placing bet: ${data}`);
         }
+      } catch (error) {
+        console.error('Network error:', error);
+        alert('Network error. Please try again later.');
+      }
+    }
+
+    async function uploadFile() {
+      const fileInput = document.getElementById('fileInput');
+      const file = fileInput.files[0];
+
+      if (!file) {
+        alert('Please select a file to upload');
+        return;
+      }
+
+      try {
+        // Request a presigned URL from the backend
+        const response = await fetch('http://localhost:3000/payments/manual-payment/generate-psu', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ fileName: file.name, fileType: file.type })
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+          console.error('Error generating presigned URL:', data);
+          alert(`Error generating presigned URL: ${data.error}`);
+          return;
+        }
+
+        const { url, key } = data;
+        console.log(url);
+        // Upload the file to S3 using the presigned URL
+        const uploadResponse = await fetch(url, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': file.type
+          },
+          body: file
+        });
+
+        if (!uploadResponse.ok) {
+          console.error('Error uploading file:', uploadResponse);
+          alert('Error uploading file. Please try again later.');
+          return;
+        }
+
+        console.log('File uploaded successfully:', key);
+        alert('File uploaded successfully');
+        
+        // Optionally, you can send the file key to your backend to store it in the database
+        const saveResponse = await fetch('http://localhost:3000/payments/manual-payment/save-key', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ key ,amount:100})
+        });
+
+        const saveData = await saveResponse.json();
+        if (!saveResponse.ok) {
+          console.error('Error saving file key:', saveData);
+          alert(`Error saving file key: ${saveData.error}`);
+          return;
+        }
+
+        console.log('File key saved successfully:', saveData);
       } catch (error) {
         console.error('Network error:', error);
         alert('Network error. Please try again later.');
