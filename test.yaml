@@ -9,7 +9,7 @@ scenarios:
       - post:
           url: "/bets/makeBet"
           headers:
-            Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjhlMzBkZDI4YmI2OTJhYTk4OGYzNGMiLCJpYXQiOjE3MjIxNjg5MDQsImV4cCI6MTcyMjc3MzcwNH0.xn3YcVXUxAeDUTeH2hmg4E4gG6DlhP8iLfHSVJaC70Q"
+            Authorization: "Bearer "
           json:
             gameName: "coinFlip"
             roundDuration: 1
