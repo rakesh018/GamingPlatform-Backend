@@ -20,24 +20,29 @@ router.post(
     const round = gameTimers[gameName].find(
       (r) => r.duration === roundDuration
     );
-    round[`betAmount${mappedChoice}`] += (betAmount);
+    round[`betAmount${mappedChoice}`] += betAmount;
     // Add the bet to the respective queue
     try {
       const newUser = await User.findOneAndUpdate(
         //this operation is atomic
-        { _id: req.userId, balance: { $gt: betAmount }},
-        { $inc:{balance:-betAmount} },
+        { _id: req.userId, balance: { $gt: betAmount } },
+        { $inc: { balance: -betAmount } },
         { new: true }
       );
       if (!newUser) {
-        throw new Error(JSON.stringify({status:400,message:`INVALID BALANCE ERROR`}));
+        throw new Error(
+          JSON.stringify({ status: 400, message: `INVALID BALANCE ERROR` })
+        );
       }
       await queue.add("bet", { betAmount, mappedChoice, userId });
-      res.status(200).json({
-        message: `Received ${betAmount} on ${gameName} for round ${roundDuration}`,
-      });
+      res
+        .status(200)
+        .json({
+          updatedBalance: newUser.balance,
+          message: `Received ${betAmount} on ${gameName} for round ${roundDuration}`,
+        });
     } catch (error) {
-      const parsedError=JSON.parse(error.message);
+      const parsedError = JSON.parse(error.message);
       res.status(parsedError.status).json(parsedError.message);
     }
   }

@@ -21,6 +21,8 @@ const processPayoutJob = async (job) => {
   const newBet = new Bet({
     userId,
     gameId,
+    gameType:gameName,
+    roundDuration:parseInt(roundDuration),
     betAmount,
     choice,
     isWin: Boolean(choice === result),
