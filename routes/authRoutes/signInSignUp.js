@@ -381,4 +381,79 @@ router.get("/forgot-password/get-otp", validateToken, async (req, res) => {
   }
 });
 
+router.post(
+  "/forgot-password/validate-otp",
+  validateToken,
+  [
+    // Validate and sanitize inputs
+    body("otp").isLength({ min: 4, max: 4 }).withMessage("INVALID OTP ERROR"),
+    body("newPassword")
+      .isLength({ min: 6 })
+      .withMessage("PASSWORD LENGTH ERROR"),
+  ],
+  async (req, res) => {
+    try {
+      // Handle validation errors
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        throw new Error(
+          JSON.stringify({ status: 400, message: errors.array()[0].msg })
+        );
+      }
+
+      const { otp, newPassword } = req.body;
+      const userId = req.userId; // validateToken sets 
+
+      // Find the OTP in the database
+      const foundOTP = await OTP.findOne({
+        userId,
+        code: otp,
+        purpose: "forgotPassword",
+      });
+
+      if (!foundOTP) {
+        throw new Error(
+          JSON.stringify({
+            status: 400,
+            message: "INVALID OR EXPIRED OTP ERROR",
+          })
+        );
+      }
+
+      // Hash the new password
+      const hashedPassword = await bcrypt.hash(newPassword, 5); // Using 5 salt rounds
+
+      // Update the user's password
+      const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        { password: hashedPassword },
+        { new: true }
+      );
+
+      if (!updatedUser) {
+        throw new Error(
+          JSON.stringify({
+            status: 500,
+            message: "FAILED TO UPDATE PASSWORD ERROR",
+          })
+        );
+      }
+
+      // Delete the OTP from the database
+      await OTP.deleteOne({ _id: foundOTP._id });
+
+      res.status(200).json({ message: "Password reset successfully." });
+    } catch (error) {
+      console.error("Error during OTP validation for password reset:", error);
+      let parsedError;
+      try {
+        parsedError = JSON.parse(error.message);
+      } catch (parseError) {
+        parsedError = { status: 500, message: "INTERNAL SERVER ERROR" };
+      }
+      res.status(parsedError.status).json({ error: parsedError.message });
+    }
+  }
+);
+
 module.exports = router;
