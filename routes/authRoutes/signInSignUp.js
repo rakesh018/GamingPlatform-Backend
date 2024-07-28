@@ -92,14 +92,23 @@ router.post(
       }
 
       // Save OTP to database
-      const newOTP = new OTP({
-        userId: savedUser._id, // Associate OTP with the newly created user
-        code: otpCode.toString(),
-        purpose: "registration", // Specify the purpose
-        createdAt: new Date(),
-      });
+      //If already exists,update or else create new one
+      const savedOTP = await OTP.findOneAndUpdate(
+        {
+          userId: savedUser._id,
+          purpose: "registration",
+        },
+        {
+          code: otpCode.toString(),
+          createdAt: new Date(),
+        },
+        {
+          new: true,
+          upsert: true,
+          setDefaultsOnInsert: true,
+        }
+      );
 
-      const savedOTP = await newOTP.save();
       if (!savedOTP) {
         throw new Error(
           JSON.stringify({ status: 500, message: "FAILED TO SAVE OTP ERROR" })
@@ -302,69 +311,74 @@ router.put(
   }
 );
 
-router.get(
-    "/forgot-password/get-otp",
-    validateToken,
-    async (req, res) => {
-      try {
-        const  userId  = req.userId;
-  
-        // Fetch the user by userId
-        const user = await User.findById(userId);
-  
-        if (!user) {
-          throw new Error(
-            JSON.stringify({ status: 404, message: "USER NOT FOUND ERROR" })
-          );
-        }
-  
-        // Generate OTP
-        const otpCode = otpGenerator.generate(4, {
-          digits: true,
-          lowerCaseAlphabets: false,
-          upperCaseAlphabets: false,
-          specialChars: false,
-        });
-  
-        // Send OTP via SMS
-        const ReceiverUrl = `${process.env.RENFLAIR_URL}&PHONE=${user.phone}&OTP=${otpCode}`;
-        const OTPresponse = await axios.get(ReceiverUrl);
-        if (OTPresponse.data.status !== "SUCCESS") {
-          throw new Error(
-            JSON.stringify({ status: 500, message: "OTP SENDING ERROR" })
-          );
-        }
-  
-        // Save OTP to database
-        const newOTP = new OTP({
-          userId: user._id,
-          code: otpCode.toString(),
-          purpose: "forgotPassword",
-          createdAt: new Date(),
-        });
-  
-        const savedOTP = await newOTP.save();
-        if (!savedOTP) {
-          throw new Error(
-            JSON.stringify({ status: 500, message: "FAILED TO SAVE OTP ERROR" })
-          );
-        }
-  
-        res.status(200).json({
-          message: "OTP sent successfully.",
-          userId: user._id,
-        });
-      } catch (error) {
-        console.error("Error during forgot password OTP generation:", error);
-        let parsedError;
-        try {
-          parsedError = JSON.parse(error.message);
-        } catch (parseError) {
-          parsedError = { status: 500, message: "INTERNAL SERVER ERROR" };
-        }
-        res.status(parsedError.status).json({ error: parsedError.message });
-      }
+router.get("/forgot-password/get-otp", validateToken, async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    // Fetch the user by userId
+    const user = await User.findById(userId);
+
+    if (!user) {
+      throw new Error(
+        JSON.stringify({ status: 404, message: "USER NOT FOUND ERROR" })
+      );
     }
-  );
+
+    // Generate OTP
+    const otpCode = otpGenerator.generate(4, {
+      digits: true,
+      lowerCaseAlphabets: false,
+      upperCaseAlphabets: false,
+      specialChars: false,
+    });
+
+    // Send OTP via SMS
+    const ReceiverUrl = `${process.env.RENFLAIR_URL}&PHONE=${user.phone}&OTP=${otpCode}`;
+    const OTPresponse = await axios.get(ReceiverUrl);
+    if (OTPresponse.data.status !== "SUCCESS") {
+      throw new Error(
+        JSON.stringify({ status: 500, message: "OTP SENDING ERROR" })
+      );
+    }
+
+    // Save OTP to database
+    //If already exists,update or else create new one
+    const savedOTP = await OTP.findOneAndUpdate(
+      {
+        userId: user._id,
+        purpose: "forgotPassword",
+      },
+      {
+        code: otpCode.toString(),
+        createdAt: new Date(),
+      },
+      {
+        new: true,
+        upsert: true,
+        setDefaultsOnInsert: true,
+      }
+    );
+
+    if (!savedOTP) {
+      throw new Error(
+        JSON.stringify({ status: 500, message: "FAILED TO SAVE OTP ERROR" })
+      );
+    }
+
+    res.status(200).json({
+      message: "OTP sent successfully.",
+      userId: user._id,
+    });
+  } catch (error) {
+    console.error("Error during forgot password OTP generation:", error);
+    let parsedError;
+    try {
+      parsedError = JSON.parse(error.message);
+    } catch (parseError) {
+      parsedError = { status: 500, message: "INTERNAL SERVER ERROR" };
+    }
+    res.status(parsedError.status).json({ error: parsedError.message });
+  }
+});
 
 module.exports = router;
