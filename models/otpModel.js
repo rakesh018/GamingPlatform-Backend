@@ -3,7 +3,7 @@ const User=require("./userModels")
 const otpSchema=new mongoose.Schema({
     userId:{type:mongoose.Schema.Types.ObjectId,required:true,ref:User},
     code:{type:String,required:true},
-    purpose:{type:String,required:true,enum: ['registration', 'reset_password', 'edit_details']}, //purpose can be 'registration','reset_password','edit_details'
+    purpose:{type:String,required:true,enum: ['registration', 'forgotPassword', 'edit_details']}, //purpose can be 'registration','reset_password','edit_details'
     createdAt:{type:Date,default:Date.now,expires:'10m'}, //expires automatically after 5 minutes
 })
 
