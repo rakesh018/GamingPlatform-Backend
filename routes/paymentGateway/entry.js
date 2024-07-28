@@ -7,11 +7,14 @@ const validateAutoPayment=require('../../middlewares/validateAutoPayment');
 const webHook=require('./webHook');
 const generatePSU = require("./manualDeposit");
 const saveManualDepositKey = require("./saveManualDepositKey");
+const withdrawalRequest = require("./withdrawalRequest");
+const validateWithdrawalRequest = require("../../middlewares/validateWithdrawalRequest");
 
 //routes
 router.post("/auto-payment", validateToken, validateAutoPayment, makeAutoPayment);
 router.post("/webhook",webHook);
 router.post("/manual-payment/generate-psu",validateToken,generatePSU);
 router.post("/manual-payment/save-key",validateToken,saveManualDepositKey);
+router.post("/withdrawal-request",validateWithdrawalRequest,withdrawalRequest);
 
 module.exports = router;
