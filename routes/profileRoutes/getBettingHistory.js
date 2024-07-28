@@ -2,8 +2,8 @@ const Bet = require("../../models/betModel");
 const getBettingHistory = async (req, res) => {
   try {
     const page = parseInt(req.query?.page) || 1;
-    const limit = process.env.PAGE_LIMIT;
-
+    const limit = parseInt(process.env.PAGE_LIMIT);
+    console.log(limit);
     //Fetch partial data from database
     const paginatedBets = await Bet.find({userId:req.userId})
       .sort({ createdAt: -1 })
@@ -16,13 +16,16 @@ const getBettingHistory = async (req, res) => {
         JSON.stringify({ status: 500, message: "ERROR FETCHING BETS1" })
       );
     }
+    if(paginatedBets.length===0){
+      throw new Error(JSON.stringify({status:400,message:"NO BETS FOUND"}))
+    }
     const totalBets = await Bet.countDocuments({ userId: req.userId });
     if (!totalBets) {
       throw new Error(
         JSON.stringify({ status: 500, message: "ERROR FETCHING BETS" })
       );
     }
-
+    console.log(paginatedBets,totalBets);
     res.status(200).json({
       paginatedBets,
       totalBets,
@@ -30,11 +33,13 @@ const getBettingHistory = async (req, res) => {
       totalPages: Math.ceil(totalBets / limit),
     });
   } catch (error) {
-    let parsedError = { status: 500, message: `INTERNAL SERVER ERROR` };
-    console.error(
-      `Error occured during fetching all users for admin : `,
-      error
-    );
+    let parsedError;
+    try {
+      parsedError = JSON.parse(error.message);
+    } catch (e) {
+      parsedError = { status: 500, message: `ERROR FETCHING USER BETTING HISTORY` };
+    }
+    console.error(`ERROR FETCHING USER BETTING HISTORY : ${error}`);
     res.status(parsedError.status).json({ error: parsedError.message });
   }
 };

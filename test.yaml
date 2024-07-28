@@ -2,18 +2,17 @@ config:
   target: http://localhost:3000
   phases:
     - duration: 30
-      arrivalRate: 60
+      arrivalRate: 20
       name: Spike phase
 scenarios:
   - flow:
       - post:
-          url: "/auth/signin"
-          # headers:
-          #   Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjhlMzBkZDI4YmI2OTJhYTk4OGYzNGMiLCJpYXQiOjE3MjA2OTg4MTYsImV4cCI6MTcyMTMwMzYxNn0.3HW27lO6qtXtLekw0Egbr21jmeYz_G_1zft-iudxlQA"
+          url: "/bets/makeBet"
+          headers:
+            Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjhlMzBkZDI4YmI2OTJhYTk4OGYzNGMiLCJpYXQiOjE3MjIxNjg5MDQsImV4cCI6MTcyMjc3MzcwNH0.xn3YcVXUxAeDUTeH2hmg4E4gG6DlhP8iLfHSVJaC70Q"
           json:
-            # gameName: "coinFlip"
-            # roundDuration: 1
-            # betAmount: 10
-            # choice: "tail"
-            emailOrPhone: 8247881640
-            password: "passks"
+            gameName: "coinFlip"
+            roundDuration: 1
+            betAmount: 10
+            choice: "tail"
+            
