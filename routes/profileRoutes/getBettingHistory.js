@@ -3,7 +3,6 @@ const getBettingHistory = async (req, res) => {
   try {
     const page = parseInt(req.query?.page) || 1;
     const limit = parseInt(process.env.PAGE_LIMIT);
-    console.log(limit);
     //Fetch partial data from database
     const paginatedBets = await Bet.find({userId:req.userId})
       .sort({ createdAt: -1 })
@@ -25,7 +24,6 @@ const getBettingHistory = async (req, res) => {
         JSON.stringify({ status: 500, message: "ERROR FETCHING BETS" })
       );
     }
-    console.log(paginatedBets,totalBets);
     res.status(200).json({
       paginatedBets,
       totalBets,

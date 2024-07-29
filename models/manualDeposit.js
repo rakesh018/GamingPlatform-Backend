@@ -10,11 +10,11 @@ const manualDepositSchema = new mongoose.Schema(
     s3Key: {
       type: String,
       required: true,
-      default:null, //after getting confirmation from frontend, we can update this field
+      default: null, //after getting confirmation from frontend, we can update this field
     },
     status: {
       type: String,
-      enum: ["pending", "verified", "rejected"],
+      enum: ["pending", "completed", "failed", "rejected"],
       default: "pending",
     },
     amount: {
@@ -25,6 +25,6 @@ const manualDepositSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const ManualDeposit = mongoose.model("ManualDeposit", manualDepositSchema);
 
-module.exports = ManualDeposit;
+
+module.exports = mongoose.model('ManualDeposit',manualDepositSchema);

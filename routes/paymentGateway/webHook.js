@@ -1,32 +1,32 @@
 const mongoose = require("../../models/db");
 const User = require("../../models/userModels");
-const Transaction = require("../../models/transactionModel");
+const AutoDeposit = require("../../models/autoDeposit");
 
 const webHook = async (req, res) => {
   // {
   //     order_id,status,remarks are received on this route by payment gateway upon successful payment
   // }
   const { order_id, status, remark1 } = req.body;
-  //Update the transaction as completed and increasing the balance of the user
+  //Update the AutoDeposit as completed and increasing the balance of the user
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
-    //Update status of transaction
-    const updatedTransaction = await Transaction.findByIdAndUpdate(
+    //Update status of AutoDeposit
+    const updatedAutoDeposit = await AutoDeposit.findByIdAndUpdate(
       order_id,
       { status: "completed" },
       { new: true, session }
     );
-    if (!updatedTransaction) {
+    if (!updatedAutoDeposit) {
       throw new Error(
-        JSON.stringify({ message: "COULD NOT UPDATE TRANSACTION" })
+        JSON.stringify({ message: "COULD NOT UPDATE AUTO DEPOSIT" })
       );
     }
     //Update balance of user
     const updatedUser = await User.findByIdAndUpdate(
-      updatedTransaction.userId,
-      { $inc: { balance: updatedTransaction.amount } },
+      updatedAutoDeposit.userId,
+      { $inc: { balance: updatedAutoDeposit.amount } },
       { new: true, session }
     );
     if (!updatedUser) {
@@ -44,8 +44,14 @@ const webHook = async (req, res) => {
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
+    let parsedError;
+    try {
+      parsedError=JSON.parse(error.message);
+    } catch (e) {
+      parsedError={status:500,message:`INTERNAL SERVER ERROR`};
+    }
     console.error(`Error occured processing webhook for order : ${order_id}`);
-    res.status(400).json({messge:`Issue with webhook`});
+    res.status(400).json({message:`Issue with webhook`});
   }
 };
 

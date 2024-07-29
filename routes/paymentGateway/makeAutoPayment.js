@@ -1,4 +1,4 @@
-const Transaction = require("../../models/transactionModel");
+const AutoDeposit = require("../../models/autoDeposit");
 const axios=require('axios');
 const makeAutoPayment = async (req, res) => {
   //Makes an order order and gets link to qr code to which user can pay
@@ -7,20 +7,19 @@ const makeAutoPayment = async (req, res) => {
   // }
 
   //Put the request in the DB and return the id generated
-  const { phoneNumber, amount, type } = req.body;
+  const { phoneNumber, amount } = req.body;
   try {
-    const newTransaction = new Transaction({
+    const newAutoDeposit = new AutoDeposit({
       userId: req.userId, //from token validation
       amount: amount,
-      type: type,
       phoneNumber: phoneNumber,
     });
 
-    //Saving transaction request to DB with default pending status
-    const savedTransaction = await newTransaction.save();
-    if (!savedTransaction) {
+    //Saving AutoDeposit request to DB with default pending status
+    const savedAutoDeposit = await newAutoDeposit.save();
+    if (!savedAutoDeposit) {
       throw new Error(
-        JSON.stringify({ status: 400, message: `ERROR SAVING TRANSACTION` })
+        JSON.stringify({ status: 400, message: `ERROR SAVING AutoDeposit` })
       );
     }
 
@@ -28,8 +27,7 @@ const makeAutoPayment = async (req, res) => {
     const gatewayResponse = await createOrder({
       phoneNumber: phoneNumber,
       amount: amount,
-      order_id: savedTransaction._id,
-      type: type,
+      order_id: savedAutoDeposit._id,
     });
     res.json({ message: `QR CODE GENERATED`,paymentUrl:gatewayResponse.result.payment_url });
   } catch (error) {
@@ -39,7 +37,7 @@ const makeAutoPayment = async (req, res) => {
     } catch (e) {
       parsedError = { status: 400, message: `INTERNAL SERVER ERROR` };
     }
-
+    console.error(`ERROR MAKING AUTO PAYMENT `, error)
     res.status(parsedError.status).json({ message: parsedError.message });
   }
 };
@@ -63,7 +61,6 @@ const createOrder = async (orderDetails) => {
     amount: `${orderDetails.amount}`,
     order_id: `${orderDetails.order_id}`,
     redirect_url: `https://upii.instamedia.in`,
-    remark1: `${orderDetails.type}`,
   };
 
   try {
@@ -73,8 +70,7 @@ const createOrder = async (orderDetails) => {
       },
     });
 
-    const data = response.data;
-
+    const data=response.data;
     if (response.status === 200 && data.status === true) {
       return data;
     } else {
