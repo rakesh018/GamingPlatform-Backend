@@ -7,14 +7,21 @@ const userSchema = new mongoose.Schema(
     phone: { type: String, /*unique: true,*/ required: true },
     isVerified: { type: Boolean, default: false }, //if otp is verfied yet or not
     isRestricted: { type: Boolean, default: false }, //if admin restricted this account or not
-    balance: { type: Number, default: 0 },
+    balance: { type: Number, default: 0 }, //this cannot be withdrawn
+    withdrawableBalance: { type: Number, default: 0 }, //can be withdrawn 
     referralCode: { type: String, required: true, unique: true },
     referredBy: {
       type: mongoose.Schema.Types.ObjectId,
       default: null,
       ref: "User",
     }, //refers to User table itself and is null if user does not provide referal code during registration
-    referralBalance: { type: Number, required: true, default: 0 },
+    referralCommission: {
+      type: Number,
+      min: 1.0,
+      max: 100.0,
+      required: true,
+      default: 5,
+    }, //5% is common for all
     firstDepositMade: { type: Boolean, default: false }, //can be used to track referral
   },
   {

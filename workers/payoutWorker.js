@@ -12,9 +12,10 @@ const processPayoutJob = async (job) => {
 
   if (choice === result) {
     //win situation so update user balance
+    //as it is winning amount update in withdrawable amount 
     await User.findOneAndUpdate(
       { _id: userId },
-      { $inc: { balance: process.env.ODDS * betAmount } }
+      { $inc: { withdrawableBalance: process.env.ODDS * betAmount } }
     );
   }
   //make a new entry in bets database
