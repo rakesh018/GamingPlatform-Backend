@@ -15,6 +15,6 @@ router.post("/auto-payment", validateToken, validateAutoPayment, makeAutoPayment
 router.post("/webhook",webHook);
 router.post("/manual-payment/generate-psu",validateToken,generatePSU);
 router.post("/manual-payment/save-key",validateToken,saveManualDepositKey);
-router.post("/withdrawal-request",validateWithdrawalRequest,withdrawalRequest);
+router.post("/withdrawal-request",validateToken,validateWithdrawalRequest,withdrawalRequest);
 
 module.exports = router;
