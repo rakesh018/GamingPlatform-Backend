@@ -1,6 +1,7 @@
 const mongoose = require("../../models/db");
 const User = require("../../models/userModels");
 const AutoDeposit = require("../../models/autoDeposit");
+const notificationsQueue = require("../../workers/notificationsQueue");
 
 const webHook = async (req, res) => {
   // {
@@ -38,6 +39,15 @@ const webHook = async (req, res) => {
     await session.commitTransaction();
     session.endSession();
 
+    //Trigger notification
+    const notificationPayload = {
+      userId: updatedAutoDeposit.userId,
+      notificationType: "deposit",
+      purpose: "success",
+      amount: parseFloat(updatedAutoDeposit.amount),
+    };
+    await notificationsQueue.add("notification",notificationPayload);
+    
     res.status(200).json({
       message: `Webhook received successfully and user details updated`,
     });
@@ -46,12 +56,12 @@ const webHook = async (req, res) => {
     session.endSession();
     let parsedError;
     try {
-      parsedError=JSON.parse(error.message);
+      parsedError = JSON.parse(error.message);
     } catch (e) {
-      parsedError={status:500,message:`INTERNAL SERVER ERROR`};
+      parsedError = { status: 500, message: `INTERNAL SERVER ERROR` };
     }
     console.error(`Error occured processing webhook for order : ${order_id}`);
-    res.status(400).json({message:`Issue with webhook`});
+    res.status(400).json({ message: `Issue with webhook` });
   }
 };
 

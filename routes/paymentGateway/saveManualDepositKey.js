@@ -1,5 +1,6 @@
 const { body, validationResult } = require("express-validator");
 const ManualDeposit = require("../../models/manualDeposit"); // Replace with the actual path
+const notificationsQueue = require("../../workers/notificationsQueue");
 
 const saveManualDepositKey = [
   // Validation middleware
@@ -37,6 +38,13 @@ const saveManualDepositKey = [
         );
       }
 
+      //Trigger a notification to notify about initiated of deposit
+      await notificationsQueue.add("notification", {
+        userId,
+        notificationType: "deposit",
+        purpose: "initiated",
+        amount: parseFloat(amount),
+      });
       res.status(200).json({ message: "PAYMENT PROOF UPLOADED SUCCESSFULLY" });
     } catch (error) {
       let parsedError;

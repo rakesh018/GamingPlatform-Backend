@@ -31,6 +31,7 @@ const { socketHandler } = require("./routes/socketHandlers/connection");
 const { initializeTimers } = require("./routes/gameLogic/timer");
 
 require("./workers/payoutWorker"); //listens to payout queue to process
+require("./workers/notificationsWorker"); //listens to notification queue
 
 const authRoutes = require("./routes/authRoutes/signInSignUp");
 app.use("/auth", authRoutes);

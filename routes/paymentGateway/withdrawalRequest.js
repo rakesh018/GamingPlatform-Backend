@@ -1,10 +1,11 @@
 const mongoose = require("../../models/db");
 const User = require("../../models/userModels");
-const Withdrawal = require("../../models/withdrawal"); 
+const Withdrawal = require("../../models/withdrawal");
+const notificationsQueue = require("../../workers/notificationsQueue");
 
 const withdrawalRequest = async (req, res) => {
   const userId = req.userId;
-  const { amount ,bankName,accountNumber,ifscCode} = req.body;
+  const { amount, bankName, accountNumber, ifscCode } = req.body;
 
   // Start a session and Withdrawal
   const session = await mongoose.startSession();
@@ -38,7 +39,7 @@ const withdrawalRequest = async (req, res) => {
       amount,
       bankName,
       accountNumber,
-      ifscCode
+      ifscCode,
     });
 
     // Save the Withdrawal
@@ -48,6 +49,14 @@ const withdrawalRequest = async (req, res) => {
     await session.commitTransaction();
     session.endSession();
 
+    //Trigger a notification
+    const notificationPayload = {
+      userId: userId,
+      notificationType: "withdrawal",
+      purpose: "initiated",
+      amount: amount,
+    };
+    await notificationsQueue.add("notification", notificationPayload);
     res.status(200).json({
       message: "Withdrawal request generated successfully",
       updatedBalance: user.withdrawableBalance + user.balance,
@@ -63,7 +72,9 @@ const withdrawalRequest = async (req, res) => {
     } catch (e) {
       parsedError = { status: 500, message: "INTERNAL SERVER ERROR" };
     }
-    console.error(`Error occurred during creating withdrawal request: ${error}`);
+    console.error(
+      `Error occurred during creating withdrawal request: ${error}`
+    );
     res.status(parsedError.status).json({ error: parsedError.message });
   }
 };
