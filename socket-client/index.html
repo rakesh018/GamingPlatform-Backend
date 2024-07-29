@@ -64,6 +64,11 @@
       console.log('Disconnected from server');
     });
 
+    socket.on('resultBroadcast',(gameName,roundDuration,parsedResults)=>{
+      console.log(`Game Name : ${gameName}`);
+      console.log(`Round Duration : ${roundDuration}`),
+      console.log(`Parsed Results : ${parsedResults}`);
+    })
     socket.on('timerUpdate', (data) => {
       const { gameName, roundDuration, newTimer } = data;
       const timerElement = document.getElementById(`timer${gameName}${roundDuration}`);

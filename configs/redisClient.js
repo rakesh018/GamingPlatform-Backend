@@ -1,15 +1,15 @@
 //For caching purpose
 const redis = require("redis");
 
-//Create a redis client
-const client = redis.createClient({ url: "redis://localhost:6379" });
+//Create a redis redisClient
+const redisClient = redis.createClient({ url: "redis://localhost:6379" });
 
-client.on("error", (err) => {
+redisClient.on("error", (err) => {
   console.error(`Redis error : `, error);
 });
 
 //Connect to the redis server
-client
+redisClient
   .connect()
   .then(() => {
     console.log(`Connected to Redis database`);
@@ -18,4 +18,4 @@ client
     console.log(`Error connecting Redis`);
   });
 
-module.exports = client;
+module.exports = redisClient;
