@@ -1,22 +1,22 @@
 const AutoDeposit = require("../../../models/autoDeposit");
 
-const getCompletedAutoDeposits = async (req, res) => {
+const getPendingAutoDeposits = async (req, res) => {
   try {
     const page = parseInt(req.query?.page) || 1;
     const limit = process.env.PAGE_LIMIT;
 
-    // Fetch paginated auto deposits with status 'completed'
+    // Fetch paginated auto deposits with status 'pending'
     const paginatedAutoDeposits = await AutoDeposit.find({
-      status: "completed",
+      status: "pending",
     })
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
       .select("userId amount status createdAt");
 
-    // Count total documents with status 'completed' and sum their amounts
+    // Count total documents with status 'pending' and sum their amounts
     const totalDeposits = await AutoDeposit.aggregate([
-      { $match: { status: "completed" } },
+      { $match: { status: "pending" } },
       {
         $group: {
           _id: null,
@@ -46,4 +46,4 @@ const getCompletedAutoDeposits = async (req, res) => {
   }
 };
 
-module.exports = getCompletedAutoDeposits;
+module.exports = getPendingAutoDeposits;
