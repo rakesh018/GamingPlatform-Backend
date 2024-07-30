@@ -61,6 +61,8 @@ const createOrder = async (orderDetails) => {
     amount: `${orderDetails.amount}`,
     order_id: `${orderDetails.order_id}`,
     redirect_url: `https://upii.instamedia.in`,
+    route:`1`,
+    remark1:`Deposit id : ${orderDetails.order_id}`
   };
 
   try {
@@ -71,7 +73,7 @@ const createOrder = async (orderDetails) => {
     });
 
     const data=response.data;
-    if (response.status === 200 && data.status === true) {
+    if (data.status === true) {
       return data;
     } else {
       throw new Error(JSON.stringify({status:500,message:`INTERNAL SERVER ERROR`}));

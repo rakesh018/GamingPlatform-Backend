@@ -3,7 +3,7 @@ const User = require("../models/userModels");
 
 //This middleware verifies jwt token and then proceeds to confirm if user is not banned
 const validateToken = async (req, res, next) => {
-  const token = req.header("Authorization").split(" ")[1]; //'Bearer token
+  const token = req?.header("Authorization")?.split(" ")[1]; //'Bearer token
   if (!token) {
     return res.status(401).json({ error: "ACCESS DENIED, NO TOKEN PROVIDED" });
   }

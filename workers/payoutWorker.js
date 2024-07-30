@@ -9,7 +9,7 @@ const processPayoutJob = async (job) => {
   //      string  string    int   int        num     string    string
 
   //update user balance (only if he wins else no) and make an entry in bets table
-
+  let winnings=0;
   if (choice === result) {
     //win situation so update user balance
     //as it is winning amount update in withdrawable amount 
@@ -17,6 +17,7 @@ const processPayoutJob = async (job) => {
       { _id: userId },
       { $inc: { withdrawableBalance: process.env.ODDS * betAmount } }
     );
+    winnings=process.env.ODDS * betAmount;
   }
   //make a new entry in bets database
   const newBet = new Bet({
@@ -27,6 +28,7 @@ const processPayoutJob = async (job) => {
     betAmount,
     choice,
     isWin: Boolean(choice === result),
+    winningAmount:winnings,
   });
   await newBet.save();
 };

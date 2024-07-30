@@ -59,7 +59,6 @@ const broadCastResults = async (gameName, roundDuration, roundResult,io) => {
 
     // Parse the results from JSON
     const parsedResults = results.map((result) => JSON.parse(result));
-    console.log(gameName,roundDuration,parsedResults);
 
     // Broadcast the results to all connected clients
     io.emit("resultBroadcast",gameName,roundDuration, parsedResults);

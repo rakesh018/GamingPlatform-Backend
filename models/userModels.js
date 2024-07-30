@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema(
     isVerified: { type: Boolean, default: false }, //if otp is verfied yet or not
     isRestricted: { type: Boolean, default: false }, //if admin restricted this account or not
     balance: { type: Number, default: 0 }, //this cannot be withdrawn
-    withdrawableBalance: { type: Number, default: 0 }, //can be withdrawn 
+    withdrawableBalance: { type: Number, default: 0 }, //can be withdrawn
     referralCode: { type: String, required: true, unique: true },
     referredBy: {
       type: mongoose.Schema.Types.ObjectId,
@@ -23,6 +23,7 @@ const userSchema = new mongoose.Schema(
       default: 5,
     }, //5% is common for all
     firstDepositMade: { type: Boolean, default: false }, //can be used to track referral
+    userType: { type: String, required: true, enum: ["regular", "demo"],default:'regular' },
   },
   {
     timestamps: true, //store createdAt and updatedAt fields automatically

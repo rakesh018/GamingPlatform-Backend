@@ -8,7 +8,7 @@ const getBettingHistory = async (req, res) => {
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
-      .select("gameType roundDuration betAmount isWin createdAt");
+      .select("gameType roundDuration betAmount isWin createdAt winningAmount");
 
     if (!paginatedBets) {
       throw new Error(

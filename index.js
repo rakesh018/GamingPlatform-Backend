@@ -48,6 +48,9 @@ app.use("/payments", paymentRoutes);
 const adminRoutes=require('./routes/adminRoutes/entry');
 app.use("/admin",adminRoutes);
 
+//cron jobs to timely update the leaderboards
+const scheduleLeaderboardUpdates = require("./workers/leaderBoardScheduler");
+scheduleLeaderboardUpdates();
 
 // Socket.io connection
 io.use(authenticateSocketConnection); //only authorized users must be able to get a socket connection

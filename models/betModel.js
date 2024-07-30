@@ -11,6 +11,7 @@ const betSchema = new mongoose.Schema(
     betAmount: { type: Number, required: true },
     choice: { type: Number, required: true },
     isWin: { type: Boolean, required: true },
+    winningAmount:{type:Number,default:0}
   },
   { timestamps: true }
 );
