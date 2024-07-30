@@ -6,12 +6,15 @@ const getUnverifiedUsers = async (req, res) => {
     const limit = process.env.PAGE_LIMIT;
 
     //Fetch partial data from database
-    const paginatedUnverifiedUsers = await User.find({isVerified:false})
+    const paginatedUnverifiedUsers = await User.find({ isVerified: false })
+      .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
       .select("_id phone createdAt balance");
 
-    const totalUnverifiedUsers = await User.countDocuments({isVerified:false});
+    const totalUnverifiedUsers = await User.countDocuments({
+      isVerified: false,
+    });
 
     res.status(200).json({
       paginatedUnverifiedUsers,

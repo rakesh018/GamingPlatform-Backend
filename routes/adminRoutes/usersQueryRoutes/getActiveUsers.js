@@ -6,6 +6,7 @@ const getActiveUsers = async (req, res) => {
 
     //Fetch partial data from database
     const paginatedActiveUsers = await User.find({ isVerified: true })
+      .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
       .select("_id phone createdAt balance");
