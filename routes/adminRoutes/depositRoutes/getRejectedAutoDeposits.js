@@ -1,13 +1,13 @@
 const AutoDeposit = require("../../../models/autoDeposit");
 
-const getPendingAutoDeposits = async (req, res) => {
+const getRejectedAutoDeposits = async (req, res) => {
   try {
     const page = parseInt(req.query?.page) || 1;
     const limit = process.env.PAGE_LIMIT;
 
     // Fetch paginated auto deposits with status 'pending'
     const paginatedAutoDeposits = await AutoDeposit.find({
-      status: "pending",
+      status: "rejected",
     })
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
@@ -16,7 +16,7 @@ const getPendingAutoDeposits = async (req, res) => {
 
     // Count total documents with status 'pending' and sum their amounts
     const totalDeposits = await AutoDeposit.aggregate([
-      { $match: { status: "pending" } },
+      { $match: { status: "rejected" } },
       {
         $group: {
           _id: null,
@@ -32,7 +32,7 @@ const getPendingAutoDeposits = async (req, res) => {
 
     res.status(200).json({
       paginatedAutoDeposits,
-      pending: { count: totalCount, totalAmount: totalAmount },
+      rejected: { count: totalCount, totalAmount: totalAmount },
       currentPage: page,
       totalPages: Math.ceil(totalCount / limit),
     });
@@ -46,4 +46,4 @@ const getPendingAutoDeposits = async (req, res) => {
   }
 };
 
-module.exports = getPendingAutoDeposits;
+module.exports = getRejectedAutoDeposits;
