@@ -44,23 +44,23 @@ app.use("/bets", betRoutes);
 const paymentRoutes = require("./routes/paymentGateway/entry");
 app.use("/payments", paymentRoutes);
 
-const adminRoutes = require('./routes/adminRoutes/entry');
-app.use("/admin", adminRoutes);
+const adminRoutes = require("./routes/adminRoutes/entry");
+const validateAdminToken = require("./middlewares/validateAdminToken");
+app.use("/admin", validateAdminToken, adminRoutes);
 
 // Cron jobs to timely update the leaderboards
 const scheduleLeaderboardUpdates = require("./workers/leaderBoardScheduler");
 scheduleLeaderboardUpdates();
 
 // Define namespaces (admin socket and user socket)
-const adminNamespace = io.of('/admin');
-const userNamespace = io.of('/user');
+const adminNamespace = io.of("/admin");
+const userNamespace = io.of("/user");
 
 // Middleware for authenticating socket connections
 const authenticateUserSocket = require("./routes/socketHandlers/authenticateUserSocket");
-const authenticateAdminSocket=require('./routes/socketHandlers/authenticateAdminSocket');
+const authenticateAdminSocket = require("./routes/socketHandlers/authenticateAdminSocket");
 userNamespace.use(authenticateUserSocket);
 // adminNamespace.use(authenticateAdminSocket);
-
 
 // Socket.io connection handlers
 adminNamespace.on("connection", (socket) => {

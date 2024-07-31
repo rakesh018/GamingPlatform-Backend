@@ -1,7 +1,11 @@
 const Game = require("../../models/gameModel");
 const calculateResult = async (timer) => {
   let roundResult;
-  if (timer.betAmount0 < timer.betAmount1) {
+  if (timer.result != 2) {
+    //2 is default value for result that means it is yet to be calculated
+    //if it is 1 or 2, it means that admin changed that and we need to set it as provided by admin
+    roundResult = timer.result;
+  } else if (timer.betAmount0 < timer.betAmount1) {
     roundResult = 0;
   } else if (timer.betAmount0 > timer.betAmount1) {
     roundResult = 1;

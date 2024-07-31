@@ -1,16 +1,16 @@
 const processTimers = require("./processTimers");
 const gameTimers = {
   coinFlip: [
-    { duration: 1, remainingTime: 1 * 0, GID: 0 ,betAmount0:0,betAmount1:0}, // Round 1
-    { duration: 3, remainingTime: 3 * 0, GID: 0 ,betAmount0:0,betAmount1:0}, // Round 2
-    { duration: 5, remainingTime: 5 * 0, GID: 0 ,betAmount0:0,betAmount1:0}, // Round 3
-    { duration: 10, remainingTime: 10 * 0, GID: 0 ,betAmount0:0,betAmount1:0}, // Round 4
+    { duration: 1, remainingTime: 1 * 0, GID: 0 ,betAmount0:0,betAmount1:0,result:2}, // Round 1
+    { duration: 3, remainingTime: 3 * 0, GID: 0 ,betAmount0:0,betAmount1:0,result:2}, // Round 2
+    { duration: 5, remainingTime: 5 * 0, GID: 0 ,betAmount0:0,betAmount1:0,result:2}, // Round 3
+    { duration: 10, remainingTime: 10 * 0, GID: 0 ,betAmount0:0,betAmount1:0,result:2}, // Round 4
   ],
   stockTrader: [
-    { duration: 1, remainingTime: 1 * 0, GID: 0 ,betAmount0:0,betAmount1:0}, // Round 1
-    { duration: 3, remainingTime: 3 * 0, GID: 0 ,betAmount0:0,betAmount1:0}, // Round 2
-    { duration: 5, remainingTime: 5 * 0, GID: 0 ,betAmount0:0,betAmount1:0}, // Round 3
-    { duration: 10, remainingTime: 10 * 0, GID: 0 ,betAmount0:0,betAmount1:0}, // Round 4
+    { duration: 1, remainingTime: 1 * 0, GID: 0 ,betAmount0:0,betAmount1:0,result:2}, // Round 1
+    { duration: 3, remainingTime: 3 * 0, GID: 0 ,betAmount0:0,betAmount1:0,result:2}, // Round 2
+    { duration: 5, remainingTime: 5 * 0, GID: 0 ,betAmount0:0,betAmount1:0,result:2}, // Round 3
+    { duration: 10, remainingTime: 10 * 0, GID: 0 ,betAmount0:0,betAmount1:0,result:2}, // Round 4
   ],
 };
 
