@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Panel - Socket.io</title>
+  <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <h1>Admin Panel</h1>
+  <p>Open the console to see the logs.</p>
+
+  <div id="adminUpdates">
+    <h2>Game Timers</h2>
+    <div id="gameTimers">
+      <h3>Coin Flip</h3>
+      <div>Round 1 minute: <span id="timercoinFlip1">Waiting for update...</span></div>
+      <div>Round 3 minutes: <span id="timercoinFlip3">Waiting for update...</span></div>
+      <div>Round 5 minutes: <span id="timercoinFlip5">Waiting for update...</span></div>
+      <div>Round 10 minutes: <span id="timercoinFlip10">Waiting for update...</span></div>
+
+      <h3>Stock Trader</h3>
+      <div>Round 1 minute: <span id="timerstockTrader1">Waiting for update...</span></div>
+      <div>Round 3 minutes: <span id="timerstockTrader3">Waiting for update...</span></div>
+      <div>Round 5 minutes: <span id="timerstockTrader5">Waiting for update...</span></div>
+      <div>Round 10 minutes: <span id="timerstockTrader10">Waiting for update...</span></div>
+    </div>
+
+    <h2>Other Updates</h2>
+    <div id="otherUpdatesContent"></div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('token');
+    const socket = io('http://localhost:3000/admin', {
+      auth: {
+        token: `Bearer ${token}`
+      }
+    });
+
+    socket.on('connect', () => {
+      console.log('Connected to admin namespace');
+    });
+
+    socket.on('resultBroadcast', (gameName, roundDuration, roundResult) => {
+      console.log(`Game Name: ${gameName}, round Duration: ${roundDuration}, result:${roundResult}`);
+    });
+
+    socket.on('timerUpdate', (data) => {
+      const { gameName, roundDuration, newTimer,betAmount0,betAmount1 } = data;
+      updateTimerDisplay(gameName, roundDuration, newTimer,betAmount0,betAmount1);
+    });
+
+    socket.on('timerEnd', (data) => {
+      const { gameName, roundDuration, duration } = data;
+      console.log(`Round Ended: ${gameName} - Round ${roundDuration} minutes, Duration: ${duration} minutes`);
+      displayUpdate(`Round Ended for ${gameName} (Round ${roundDuration} minutes), Duration: ${duration} minutes`);
+    });
+
+    socket.on('roundFreeze', (data) => {
+      const { gameName, roundDuration } = data;
+      const timerElement = document.getElementById(`timer${gameName}${roundDuration}`);
+      if (timerElement) {
+        timerElement.innerHTML = `round Freeze`;
+      }
+    });
+
+    socket.on('disconnect', () => {
+      console.log('Disconnected from server');
+    });
+
+    function updateTimerDisplay(gameName, roundDuration, newTimer,betAmount0,betAmount1) {
+      const timerElement = document.getElementById(`timer${gameName}${roundDuration}`);
+      if (timerElement) {
+        timerElement.innerHTML = `${newTimer} remaining - betAmount0:${betAmount0} , betAmount1:${betAmount1}`;
+      }
+    }
+
+    function displayUpdate(message) {
+      const otherUpdatesContent = document.getElementById('otherUpdatesContent');
+      const updateElement = document.createElement('p');
+      updateElement.textContent = message;
+      otherUpdatesContent.appendChild(updateElement);
+    }
+  </script>
+</body>
+</html>

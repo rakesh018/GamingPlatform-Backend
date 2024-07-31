@@ -1,9 +1,11 @@
 const { registerRound } = require("./registerRound");
 const calculateResult = require("./calculateResult");
 const transferForPayout = require("./transferForPayout");
-const io = require("../../index");
 const redisClient = require("../../configs/redisClient");
 const processTimers = async (io, gameTimers) => {
+  //access namespaces of user and admin
+  const adminNamespace = io.of("/admin");
+  const userNamespace = io.of("/user");
   for (const gameName in gameTimers) {
     for (
       let roundIndex = 0;
@@ -13,10 +15,11 @@ const processTimers = async (io, gameTimers) => {
       const timer = gameTimers[gameName][roundIndex];
       const roundDuration = timer.duration;
       if (timer.remainingTime <= 0) {
-        io.emit("roundFreeze", { gameName, roundDuration });
+        userNamespace.emit("roundFreeze", { gameName, roundDuration });
+        adminNamespace.emit("roundFreeze", { gameName, roundDuration });
         if (timer.GID) {
           const roundResult = await calculateResult(timer);
-          await broadCastResults(gameName, roundDuration, roundResult,io);
+          await broadCastResults(gameName, roundDuration, roundResult, adminNamespace,userNamespace);
           await transferForPayout(
             gameName,
             roundDuration,
@@ -38,13 +41,24 @@ const processTimers = async (io, gameTimers) => {
       } else {
         timer.remainingTime -= 1; // Decrement
         const newTimer = timer.remainingTime;
-        io.emit("timerUpdate", { gameName, roundDuration, newTimer });
+        userNamespace.emit("timerUpdate", {
+          gameName,
+          roundDuration,
+          newTimer,
+        }); //send timer updates to user sockets
+        adminNamespace.emit("timerUpdate", {
+          gameName,
+          roundDuration,
+          newTimer,
+          betAmount0: timer.betAmount0,
+          betAmount1: timer.betAmount1,
+        }); //send timer details as well as bet amounts to admin
       }
     }
   }
 };
-const broadCastResults = async (gameName, roundDuration, roundResult,io) => {
-  //Maintain only top N number of results for any round type and scrape remaining 
+const broadCastResults = async (gameName, roundDuration, roundResult, adminNamespace,userNamespace) => {
+  //Maintain only top N number of results for any round type and scrape remaining
   try {
     const key = `roundResults:${gameName}:${roundDuration}`;
 
@@ -61,7 +75,8 @@ const broadCastResults = async (gameName, roundDuration, roundResult,io) => {
     const parsedResults = results.map((result) => JSON.parse(result));
 
     // Broadcast the results to all connected clients
-    io.emit("resultBroadcast",gameName,roundDuration, parsedResults);
+    userNamespace.emit("resultBroadcast", gameName, roundDuration, parsedResults);
+    adminNamespace.emit("resultBroadcast",gameName,roundDuration,roundResult);
   } catch (error) {
     console.error("Error broadcasting results:", error);
     throw error;
