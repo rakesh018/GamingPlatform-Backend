@@ -8,6 +8,7 @@ const saveManualDepositKey = [
   body("amount")
     .isFloat({ min: 1, max: 100000 })
     .withMessage("Amount must be between 1 and 100000"),
+  body("utr").notEmpty().withMessage("UTR/Transaction ID is required"),
 
   // Error handling middleware
   (req, res, next) => {
@@ -21,12 +22,13 @@ const saveManualDepositKey = [
   // Main handler
   async (req, res) => {
     try {
-      const { key, amount } = req.body;
+      const { key, amount,utr} = req.body;
       const userId = req.userId;
 
       const newManualDeposit = new ManualDeposit({
         userId: userId,
         s3Key: key,
+        utr:utr,
         amount: amount, // By default it is pending and will be reviewed by admin
       });
 

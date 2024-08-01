@@ -36,7 +36,7 @@ const generatePSU = [
   // Main handler
   async (req, res) => {
     try {
-      const { fileName, fileType } = req.body;
+      const { fileName, fileType} = req.body;
       const uniqueId = uuidv4();
       const fType=fileType.split("/")[1]; //will get only specific file type like png,jpg etc
       const objectKey = `${req.userId}/${uniqueId}.${fType}`; // Generate a unique identifier and include fileName in the key

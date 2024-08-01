@@ -12,6 +12,7 @@ const manualDepositSchema = new mongoose.Schema(
       required: true,
       default: null, //after getting confirmation from frontend, we can update this field
     },
+    utr: { type: String, required: true },
     status: {
       type: String,
       enum: ["pending", "completed", "failed", "rejected"],
@@ -25,6 +26,4 @@ const manualDepositSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-
-
-module.exports = mongoose.model('ManualDeposit',manualDepositSchema);
+module.exports = mongoose.model("ManualDeposit", manualDepositSchema);
