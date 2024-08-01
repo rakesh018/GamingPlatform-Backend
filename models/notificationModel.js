@@ -12,9 +12,10 @@ const notificationSchema = new mongoose.Schema(
     purpose: {
       type: String,
       required: true,
-      enum: ["success", "failure", "initiated"],
+      enum: ["successful", "failed", "initiated"],
     },
     amount: { type: Number, default: 0 },
+    message:{type:String,required:true}
   },
   {
     timestamps: true,

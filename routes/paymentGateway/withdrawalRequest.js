@@ -55,6 +55,7 @@ const withdrawalRequest = async (req, res) => {
       notificationType: "withdrawal",
       purpose: "initiated",
       amount: amount,
+      message:`Withdrawal request of ${amount} generated`
     };
     await notificationsQueue.add("notification", notificationPayload);
     res.status(200).json({

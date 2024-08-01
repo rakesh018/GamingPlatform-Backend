@@ -10,6 +10,7 @@ const getCompletedManualDeposits = require("./getCompletedManualDeposits");
 const getPendingManualDeposits = require("./getPendingManualDeposits");
 const getRejectedManualDeposits = require("./getRejectedManualDeposits");
 const getParticularManualDeposit = require("./getParticularManualDeposit");
+const manualDepositActionRoutes = require("./manualDepositActionRoutes");
 
 
 router.use(validateAdminToken);
@@ -22,5 +23,6 @@ router.get("/manual/completed",getCompletedManualDeposits);
 router.get("/manual/pending",getPendingManualDeposits);
 router.get("/manual/rejected",getRejectedManualDeposits);
 router.get("/manual/details/:depositId",getParticularManualDeposit);
+router.use("/manual/action",manualDepositActionRoutes);
 
 module.exports = router;

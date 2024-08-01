@@ -3,12 +3,13 @@ const redisConfig = require("../configs/redisConfig");
 const Notification = require("../models/notificationModel");
 
 const processPayoutJob = async (job) => {
-  const { userId, notificationType, purpose, amount } = job.data;
+  const { userId, notificationType, purpose, amount ,message} = job.data;
   const newNotification = new Notification({
     userId,
     notificationType,
     purpose,
     amount,
+    message
   });
   await newNotification.save();
 };

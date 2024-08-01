@@ -46,6 +46,7 @@ const saveManualDepositKey = [
         notificationType: "deposit",
         purpose: "initiated",
         amount: parseFloat(amount),
+        message:`Deposit of ${amount} initiated`
       });
       res.status(200).json({ message: "PAYMENT PROOF UPLOADED SUCCESSFULLY" });
     } catch (error) {

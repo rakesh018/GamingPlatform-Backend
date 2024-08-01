@@ -25,6 +25,7 @@ const getParticularManualDeposit = async (req, res) => {
       }
       res.json({
         url,
+        depositId,
         utr: savedManualDeposit.utr,
         status: savedManualDeposit.status,
         amount: savedManualDeposit.amount,

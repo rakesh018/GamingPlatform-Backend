@@ -43,8 +43,9 @@ const webHook = async (req, res) => {
     const notificationPayload = {
       userId: updatedAutoDeposit.userId,
       notificationType: "deposit",
-      purpose: "success",
+      purpose: "successful",
       amount: parseFloat(updatedAutoDeposit.amount),
+      message:`Deposit request of ${updatedAutoDeposit.amount} was successful`
     };
     await notificationsQueue.add("notification",notificationPayload);
     

@@ -34,7 +34,7 @@
   </div>
 
   <script>
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('adminToken');
     const socket = io('http://localhost:3000/admin', {
       auth: {
         token: `Bearer ${token}`
