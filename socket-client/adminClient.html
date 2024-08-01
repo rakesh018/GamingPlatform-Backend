@@ -26,6 +26,11 @@
 
     <h2>Other Updates</h2>
     <div id="otherUpdatesContent"></div>
+
+    <h2>Deposit URL</h2>
+    <input type="text" id="depositId" placeholder="Enter deposit ID" />
+    <button onclick="fetchPresignedUrl()">Get Presigned URL</button>
+    <p id="presignedUrl"></p>
   </div>
 
   <script>
@@ -45,8 +50,8 @@
     });
 
     socket.on('timerUpdate', (data) => {
-      const { gameName, roundDuration, newTimer,betAmount0,betAmount1 } = data;
-      updateTimerDisplay(gameName, roundDuration, newTimer,betAmount0,betAmount1);
+      const { gameName, roundDuration, newTimer, betAmount0, betAmount1 } = data;
+      updateTimerDisplay(gameName, roundDuration, newTimer, betAmount0, betAmount1);
     });
 
     socket.on('timerEnd', (data) => {
@@ -59,7 +64,7 @@
       const { gameName, roundDuration } = data;
       const timerElement = document.getElementById(`timer${gameName}${roundDuration}`);
       if (timerElement) {
-        timerElement.innerHTML = `round Freeze`;
+        timerElement.innerHTML = `Round Freeze`;
       }
     });
 
@@ -67,10 +72,10 @@
       console.log('Disconnected from server');
     });
 
-    function updateTimerDisplay(gameName, roundDuration, newTimer,betAmount0,betAmount1) {
+    function updateTimerDisplay(gameName, roundDuration, newTimer, betAmount0, betAmount1) {
       const timerElement = document.getElementById(`timer${gameName}${roundDuration}`);
       if (timerElement) {
-        timerElement.innerHTML = `${newTimer} remaining - betAmount0:${betAmount0} , betAmount1:${betAmount1}`;
+        timerElement.innerHTML = `${newTimer} remaining - Bet Amount 0: ${betAmount0}, Bet Amount 1: ${betAmount1}`;
       }
     }
 
@@ -79,6 +84,35 @@
       const updateElement = document.createElement('p');
       updateElement.textContent = message;
       otherUpdatesContent.appendChild(updateElement);
+    }
+
+    function fetchPresignedUrl() {
+      const depositId = document.getElementById('depositId').value;
+
+      if (!depositId) {
+        alert('Please enter a deposit ID');
+        return;
+      }
+
+      fetch(`http://localhost:3000/admin/deposits/manual/details/${depositId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.url) {
+            document.getElementById('presignedUrl').innerHTML = `<a href="${data.url}" target="_blank">Download/View Image</a>`;
+          } else {
+            document.getElementById('presignedUrl').innerHTML = 'Failed to get presigned URL';
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching presigned URL:', error);
+          document.getElementById('presignedUrl').innerHTML = 'Error fetching presigned URL';
+        });
     }
   </script>
 </body>
