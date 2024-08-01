@@ -7,6 +7,8 @@ const getPendingAutoDeposits = require("./getPendingAutoDeposits");
 const getRejectedAutoDeposits = require("./getRejectedAutoDeposits");
 const validateAdminToken=require('../../../middlewares/validateAdminToken');
 const getCompletedManualDeposits = require("./getCompletedManualDeposits");
+const getPendingManualDeposits = require("./getPendingManualDeposits");
+const getRejectedManualDeposits = require("./getRejectedManualDeposits");
 
 
 router.use(validateAdminToken);
@@ -16,5 +18,7 @@ router.get("/auto/pending",getPendingAutoDeposits);
 router.get("/auto/rejected",getRejectedAutoDeposits);
 router.get("/manual", getAllManualDeposits);
 router.get("/manual/completed",getCompletedManualDeposits);
+router.get("/manual/pending",getPendingManualDeposits);
+router.get("/manual/rejected",getRejectedManualDeposits);
 
 module.exports = router;
