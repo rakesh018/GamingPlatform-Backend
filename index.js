@@ -45,8 +45,7 @@ const paymentRoutes = require("./routes/paymentGateway/entry");
 app.use("/payments", paymentRoutes);
 
 const adminRoutes = require("./routes/adminRoutes/entry");
-const validateAdminToken = require("./middlewares/validateAdminToken");
-app.use("/admin", validateAdminToken, adminRoutes);
+app.use("/admin", adminRoutes);
 
 // Cron jobs to timely update the leaderboards
 const scheduleLeaderboardUpdates = require("./workers/leaderBoardScheduler");

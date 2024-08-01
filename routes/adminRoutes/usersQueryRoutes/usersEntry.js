@@ -8,6 +8,10 @@ const getParticularUserDetails=require("./getParticularUserDetails");
 const changeUserBalance=require('./changeUserBalance');
 const banUser=require("./banUser");
 const sendMail=require('./sendMail');
+const validateAdminToken=require('../../../middlewares/validateAdminToken');
+
+
+router.use(validateAdminToken);
 
 router.get("/", getAllUsers);
 router.get("/active", getActiveUsers);
