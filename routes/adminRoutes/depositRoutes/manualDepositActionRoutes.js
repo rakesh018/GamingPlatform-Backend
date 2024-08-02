@@ -77,7 +77,9 @@ router.post("/mark-completed", validateRequest, async (req, res) => {
         userId: referrer._id,
         notificationType: "referral",
         purpose: "successful",
-        amount: parseFloat(depositedAmount),
+        amount: parseFloat(
+          depositedAmount * 0.01 * referrer.referralCommission
+        ),
         message: `Debited with ${
           depositedAmount * 0.01 * referrer.referralCommission
         } as referral bonus`,
@@ -111,7 +113,8 @@ router.post("/mark-completed", validateRequest, async (req, res) => {
       userId: newUser._id,
       status: "completed",
       amount: depositedAmount,
-      createdAt:savedManualDeposit.createdAt,
+      createdAt: savedManualDeposit.createdAt,
+      utr: savedManualDeposit.utr,
     });
   } catch (error) {
     await session.abortTransaction();
@@ -125,6 +128,72 @@ router.post("/mark-completed", validateRequest, async (req, res) => {
     }
     console.error(`Error during marking manual deposit as completed: ${error}`);
     res.status(parsedError.status).json({ error: parsedError.message });
+  }
+});
+
+router.post("/mark-rejected", validateRequest, async (req, res) => {
+  // Validate request
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array()[0].msg });
+  }
+  /*
+    {need depositId}
+    here verified amount is not required so can use validate request middleware defined above
+   */
+  try {
+    const { depositId } = req.body;
+    const savedManualDeposit = await ManualDeposit.findOne({
+      _id: depositId,
+    }).exec();
+    if (!savedManualDeposit) {
+      throw new Error(
+        JSON.stringify({ status: 400, message: "INVALID DEPOSIT ID" })
+      );
+    }
+    if (savedManualDeposit.status === "completed") {
+      throw new Error(
+        JSON.stringify({
+          status: 400,
+          message: "Deposit is already completed.Cannot mark rejected",
+        })
+      );
+    } else if (savedManualDeposit.status === "rejected") {
+      throw new Error(
+        JSON.stringify({
+          status: 400,
+          message: "Deposit was already rejected.",
+        })
+      );
+    }
+    //save the status
+    savedManualDeposit.status = "rejected";
+    await savedManualDeposit.save();
+
+    //notify user
+    notificationPayload = {
+      userId: savedManualDeposit.userId,
+      notificationType: "deposit",
+      purpose: "failed",
+      amount: savedManualDeposit.amount,
+      message: `Deposit request of ${savedManualDeposit.amount} was rejected`,
+    };
+    res.status(200).json({
+      message: "Deposit marked rejected successfully",
+      depositId,
+      utr: savedManualDeposit.utr,
+      status: savedManualDeposit.status,
+      amount: savedManualDeposit.amount,
+      createdAt: savedManualDeposit.createdAt,
+    });
+  } catch (error) {
+    let parsedError;
+    try {
+      parsedError = JSON.parse(error.message);
+    } catch (e) {
+      parsedError = { status: 500, message: "INTERNAL SERVER ERROR" };
+    }
+    res.status(200).json({ error: parsedError.message });
   }
 });
 
