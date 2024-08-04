@@ -8,8 +8,7 @@ const User = require("../../models/userModels");
 
 router.post(
   "/makeBet",
-  validateToken,
-  /*validateBet,*/ async (req, res) => {
+  validateToken,validateBet, async (req, res) => {
     let { gameName, roundDuration, betAmount, betChoice } = req.body;
     const userId = req.userId; // from token validation
     const mappedChoice = mapChoice(gameName, betChoice);

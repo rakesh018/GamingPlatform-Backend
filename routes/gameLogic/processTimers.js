@@ -32,6 +32,7 @@ const processTimers = async (io, gameTimers) => {
           timer.GID = await registerRound(gameName, timer.duration);
           timer.betAmount0 = 0;
           timer.betAmount1 = 0;
+          timer.result=2;
           console.log("Registered new round with ID:", timer.GID);
         } catch (error) {
           console.log("Failed to register new round:", error);
