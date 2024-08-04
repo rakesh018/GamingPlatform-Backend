@@ -5,7 +5,7 @@ const getAllNotifications = async (req, res) => {
     const userId = req.userId;
     const notifications = await Notification.find({ userId, hasSeen: false })
       .sort({ createdAt: -1 }) // Sort by creation date, most recent first
-      .limit(10).select({_id:0,__v:0,updatedAt:0}); // Limit the results to 10
+      .limit(10).select({__v:0,updatedAt:0}); // Limit the results to 10
 
     res
       .status(200)
