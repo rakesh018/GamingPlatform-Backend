@@ -234,6 +234,11 @@ router.post(
         );
       }
 
+      //check if verified through otp
+      const isVerified=user.isVerified;
+      if(!isVerified){
+        throw new Error(JSON.stringify({status:400,message:'USER UNVERIFIED ERROR'}));
+      }
       // Generate JWT token with expiry of 7 days
       const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
         expiresIn: "7d",
