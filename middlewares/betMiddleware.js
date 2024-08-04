@@ -9,6 +9,7 @@ const validateBet = async (req, res, next) => {
     //not allowing bets in the last 3 seconds to make sure no inconsistency occurs
     return res.status(400).json({ error: `TIME UP ERROR` });
   } else {
+    req.remainingTime=getRemainingTime(gameName,parsedRoundDuration);
     next();
   }
 };

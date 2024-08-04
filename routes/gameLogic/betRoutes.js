@@ -5,6 +5,8 @@ const router = express.Router();
 const activeBets = require("./activeBetsQueues");
 const { gameTimers } = require("./timer");
 const User = require("../../models/userModels");
+const redisClient = require("../../configs/redisClient");
+const otpGenerator = require("otp-generator");
 
 router.post("/makeBet", validateToken, validateBet, async (req, res) => {
   let { gameName, roundDuration, betAmount, betChoice } = req.body;
@@ -13,7 +15,7 @@ router.post("/makeBet", validateToken, validateBet, async (req, res) => {
   betAmount = parseFloat(betAmount);
   const queue = activeBets[gameName][roundDuration];
   const round = gameTimers[gameName].find((r) => r.duration === roundDuration);
-  if (req.isDemo===false) {
+  if (req.isDemo === false) {
     //not considering demo user bets into regular flow
     round[`betAmount${mappedChoice}`] += betAmount;
   }
@@ -53,13 +55,21 @@ router.post("/makeBet", validateToken, validateBet, async (req, res) => {
     // Save the user with the updated balances within the transaction
     await user.save({ session });
 
-    // Commit the transaction
-    await session.commitTransaction();
-    session.endSession();
-
     // Add the bet to the respective queue
     await queue.add("bet", { betAmount, mappedChoice, userId });
 
+    //cache bet slip
+    await cacheBetSlip(
+      userId,
+      gameName,
+      roundDuration,
+      betAmount,
+      mappedChoice,
+      req.remainingTime
+    );
+    // Commit the transaction
+    await session.commitTransaction();
+    session.endSession();
     res.status(200).json({
       updatedBalance: user.balance + user.withdrawableBalance,
       message: `Received ${betAmount} on ${gameName} for round ${roundDuration}`,
@@ -73,6 +83,7 @@ router.post("/makeBet", validateToken, validateBet, async (req, res) => {
     } catch (error) {
       parsedError = { status: 500, message: "INTERNAL SERVER ERROR" };
     }
+    console.error(error);
     res.status(parsedError.status).json(parsedError.message);
   }
 });
@@ -85,5 +96,55 @@ const mapChoice = (gameName, betChoice) => {
     return betChoice === "up" ? 1 : 0;
   }
 };
+const cacheBetSlip = async (
+  userId,
+  gameName,
+  roundDuration,
+  betAmount,
+  mappedChoice,
+  remainingTime
+) => {
+  const uniqueId = otpGenerator.generate(5, {
+    digits: true,
+    upperCaseAlphabets: false,
+    lowerCaseAlphabets: false,
+    specialChars: false,
+  });
+  const key = `betSlips:${userId}:${uniqueId}`;
+  const payload = { gameName, roundDuration, betAmount, mappedChoice };
+  await redisClient.set(key, JSON.stringify(payload));
+  await redisClient.expire(key, remainingTime);
+};
 
+router.get("/get-bet-slips", validateToken, async (req, res) => {
+  try {
+    const userId=req.userId;
+    const pattern = `betSlips:${userId}:*`;
+    // Fetch all keys matching the pattern
+    const keys = await redisClient.keys(pattern);
+
+    // Fetch all bet data and TTL information
+    const betPromises = keys.map(async (key) => {
+      const [data, ttl] = await Promise.all([
+        redisClient.get(key),
+        redisClient.ttl(key),
+      ]);
+      return { data: JSON.parse(data), ttl };
+    });
+
+    // Resolve all promises
+    const betsWithTTL = await Promise.all(betPromises);
+
+    // Prepare response with bet data and TTL
+    const bets = betsWithTTL.map(({ data, ttl }) => ({
+      ...data,
+      ttl,
+    }));
+
+    res.status(200).json({ bets });
+  } catch (error) {
+    console.error("Error retrieving live bets:", error);
+    res.status(500).json({ error: "INTERNAL SERVER ERROR" });
+  }
+});
 module.exports = router;
