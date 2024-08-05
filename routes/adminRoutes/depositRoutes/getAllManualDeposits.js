@@ -8,7 +8,7 @@ const getAllManualDeposits = async (req, res) => {
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
-      .select("userId amount status createdAt");
+      .select("userId uid amount status createdAt");
 
     const groupByStatusPipeline = [
       {

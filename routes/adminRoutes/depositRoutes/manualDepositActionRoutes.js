@@ -111,6 +111,7 @@ router.post("/mark-completed", validateRequest, async (req, res) => {
     res.status(200).json({
       message: "Deposit marked as completed successfully",
       userId: newUser._id,
+      uid:newUser.uid,
       status: "completed",
       amount: depositedAmount,
       createdAt: savedManualDeposit.createdAt,

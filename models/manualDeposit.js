@@ -7,6 +7,7 @@ const manualDepositSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    uid:{type:String},
     s3Key: {
       type: String,
       required: true,
@@ -25,5 +26,22 @@ const manualDepositSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// Pre-save hook to populate uid from the User model
+manualDepositSchema.pre("save", async function (next) {
+  if (!this.uid) {
+    try {
+      const user = await User.findById(this.userId);
+      if (user) {
+        this.uid = user.uid;
+      } else {
+        throw new Error("User not found");
+      }
+    } catch (error) {
+      return next(error);
+    }
+  }
+  next();
+});
 
 module.exports = mongoose.model("ManualDeposit", manualDepositSchema);

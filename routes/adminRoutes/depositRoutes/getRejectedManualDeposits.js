@@ -12,7 +12,7 @@ const getRejectedManualDeposits = async (req, res) => {
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
-      .select("userId amount status createdAt");
+      .select("userId uid amount status createdAt");
 
     // Count total documents with status 'pending' and sum their amounts
     const totalDeposits = await ManualDeposit.aggregate([
