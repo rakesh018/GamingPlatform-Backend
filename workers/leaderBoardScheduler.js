@@ -4,7 +4,7 @@ const {
   updateDailyLeaderboard,
 } = require("./leaderBoardService");
 
-const scheduleLeaderboardUpdates = () => {
+const scheduleLeaderboardUpdates = async() => {
   // Schedule to update all-time leaderboard at 12 AM daily
   cron.schedule("0 0 * * *", async () => {
     console.log("All time leaderboard updated");
