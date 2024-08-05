@@ -4,7 +4,7 @@ const getProfile=async (req, res) => {
     const userId = req.userId; //got this from validate Token middleware
 
     try {
-        const getUserFromDB = await User.findById(userId).select('phone email balance isRestricted');
+        const getUserFromDB = await User.findById(userId).select('_id phone email uid balance withdrawableBalance referralCode');
         if (!getUserFromDB) {
             res.status(404).json({ error: 'USER NOT FOUND ERROR' });
         }

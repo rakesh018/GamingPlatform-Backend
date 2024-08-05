@@ -265,7 +265,7 @@ router.post(
         );
       }
       // Generate JWT token with expiry of 7 days
-      const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+      const token = jwt.sign({ userId: user._id ,uid:user.uid}, process.env.JWT_SECRET, {
         expiresIn: "7d",
       });
 

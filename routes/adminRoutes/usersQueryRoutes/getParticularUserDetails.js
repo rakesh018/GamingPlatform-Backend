@@ -1,14 +1,20 @@
 const User = require("../../../models/userModels");
+const mongoose=require('../../../models/db');
 
 const getParticularUserDetails = async (req, res) => {
   try {
-    const userId = req.params?.userId;
+    const userId = req.params?.userId; //can query using both _id and uid of user
     if (!userId) {
       throw new Error(
         JSON.stringify({ status: 404, message: `INVALID USERID` })
       );
     }
-    const getUser = await User.findOne({_id:userId});
+    //If the query parameter is objectId will use both else will use uid for searching
+    const isValidObjectId = mongoose.Types.ObjectId.isValid(userId);
+    const getUser = await User.findOne({
+      $or: [...(isValidObjectId ? [{ _id: userId }] : []), { uid: userId }],
+    });
+
     if (!getUser) {
       throw new Error(
         JSON.stringify({ status: 400, message: `INVALID USER ID` })

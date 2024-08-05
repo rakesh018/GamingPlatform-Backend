@@ -1,15 +1,13 @@
-const { body, validationResult } = require('express-validator');
+const { body, validationResult } = require("express-validator");
 const User = require("../../../models/userModels");
+const mongoose = require("../../../models/db");
 
 const customCommission = async (req, res) => {
   // Validation middleware
-  await body('userId')
-    .notEmpty()
-    .withMessage('User id required')
-    .run(req);
-  await body('referralCommission')
+  await body("userId").notEmpty().withMessage("User id required").run(req);
+  await body("referralCommission")
     .isFloat({ min: 1, max: 100 })
-    .withMessage('Commission percentage must be between 1 and 100')
+    .withMessage("Commission percentage must be between 1 and 100")
     .run(req);
 
   // Check for validation errors
@@ -20,8 +18,12 @@ const customCommission = async (req, res) => {
 
   try {
     const { userId, referralCommission } = req.body;
+    //If the query parameter is objectId will use both else will use uid for searching
+    const isValidObjectId = mongoose.Types.ObjectId.isValid(userId);
     const updatedUser = await User.findOneAndUpdate(
-      { _id: userId },
+      {
+        $or: [...(isValidObjectId ? [{ _id: userId }] : []), { uid: userId }],
+      },
       { referralCommission: referralCommission },
       { new: true }
     );
@@ -34,8 +36,9 @@ const customCommission = async (req, res) => {
       );
     }
     res.status(200).json({
-      message: "Commission percentage updated successfully and will apply from next referral bonus",
-      user: updatedUser
+      message:
+        "Commission percentage updated successfully and will apply from next referral bonus",
+      user: updatedUser,
     });
   } catch (error) {
     let parsedError;

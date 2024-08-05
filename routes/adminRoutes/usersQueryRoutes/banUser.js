@@ -1,5 +1,5 @@
 const User = require("../../../models/userModels");
-
+const mongoose=require('../../../models/db');
 const banUser = async (req, res) => {
   try {
     const userId = req.params?.userId;
@@ -8,8 +8,12 @@ const banUser = async (req, res) => {
         JSON.stringify({ status: 404, message: `INVALID USERID` })
       );
     }
+    //If the query parameter is objectId will use both else will use uid for searching
+    const isValidObjectId = mongoose.Types.ObjectId.isValid(userId);
     const updatedUser = await User.findOneAndUpdate(
-      { _id: userId },
+      {
+        $or: [...(isValidObjectId ? [{ _id: userId }] : []), { uid: userId }],
+      },
       { isRestricted: true },
       { new: true }
     );

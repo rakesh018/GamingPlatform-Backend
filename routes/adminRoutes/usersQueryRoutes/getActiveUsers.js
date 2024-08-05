@@ -9,7 +9,7 @@ const getActiveUsers = async (req, res) => {
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
-      .select("_id phone createdAt balance");
+      .select("_id phone email uid isVerified isRestricted createdAt balance withdrawableBalance");
 
     const totalActiveUsers = await User.countDocuments({ isVerified: true });
 

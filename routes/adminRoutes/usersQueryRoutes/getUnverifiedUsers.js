@@ -10,7 +10,7 @@ const getUnverifiedUsers = async (req, res) => {
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
-      .select("_id phone createdAt balance");
+      .select("_id phone email uid isVerified isRestricted createdAt balance withdrawableBalance");
 
     const totalUnverifiedUsers = await User.countDocuments({
       isVerified: false,
