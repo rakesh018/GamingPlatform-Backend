@@ -6,14 +6,16 @@ const getParticularManualDeposit = async (req, res) => {
     const depositId = req?.params?.depositId;
     if (!depositId) {
       throw new Error(
-        JSON.stringify({ status: 400, message: `Deposit Id required` })
+        JSON.stringify(JSON.stringify({ status: 400, message: `Deposit Id required` }))
       );
     }
     const savedManualDeposit = await ManualDeposit.findById(depositId);
     if (!savedManualDeposit) {
-      throw new Error({ status: 400, message: `Invalid deposit id` });
+      throw new Error(JSON.stringify({ status: 400, message: `Invalid deposit id` }));
     }
-
+    if(savedManualDeposit.isCleanedUp){
+      throw new Error(JSON.stringify({status:400,message:'File is deleted from storage'}));
+    }
     const params = {
       Bucket: process.env.AWS_BUCKET,
       Key: savedManualDeposit.s3Key,

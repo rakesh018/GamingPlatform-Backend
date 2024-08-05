@@ -19,6 +19,7 @@ const manualDepositSchema = new mongoose.Schema(
       enum: ["pending", "completed", "failed", "rejected"],
       default: "pending",
     },
+    isCleanedUp:{type:Boolean,default:false}, //shows if the file is cleaned up in aws
     amount: {
       type: Number,
       required: true,

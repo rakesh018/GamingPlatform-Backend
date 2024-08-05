@@ -12,7 +12,7 @@ const getCompletedManualDeposits = async (req, res) => {
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
-      .select("userId uid amount status createdAt");
+      .select("userId uid amount status isCleanedUp createdAt");
 
     // Count total documents with status 'completed' and sum their amounts
     const totalDeposits = await ManualDeposit.aggregate([

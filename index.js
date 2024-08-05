@@ -51,6 +51,13 @@ app.use("/admin", adminRoutes);
 const scheduleLeaderboardUpdates = require("./workers/leaderBoardScheduler");
 scheduleLeaderboardUpdates();
 
+//Cron jobs to timely update the analytics 
+const scheduleAnalyticsUpdates=require('./workers/analyticsScheduler');
+scheduleAnalyticsUpdates();
+
+//Cron job to timely clean up AWS
+const scheduleAWSCleanup=require('./workers/awsCleanupScheduler');
+scheduleAWSCleanup()
 // Define namespaces (admin socket and user socket)
 const adminNamespace = io.of("/admin");
 const userNamespace = io.of("/user");

@@ -4,17 +4,17 @@ const {
   updateMonthlyAnalytics,
 } = require("./analyticsService");
 
-const scheduleLeaderboardUpdates = () => {
+const scheduleAnalyticsUpdates = () => {
   cron.schedule("0 1 1 * *", async () => {
-    console.log("Annual analytics updated");
     await updateAnnualAnalytics();
+    console.log("Annual analytics updated");
   });
 
   
   cron.schedule("30 1 * * *", async () => {
-    console.log(`Monthly analytics updated`);
     await updateMonthlyAnalytics();
+    console.log(`Monthly analytics updated`);
   });
 };
 
-module.exports = scheduleLeaderboardUpdates;
+module.exports = scheduleAnalyticsUpdates;
