@@ -16,17 +16,17 @@ router.post(
   "/signup/get-otp",
   [
     // Validate and sanitize inputs
-    body("email").isEmail().withMessage("INVALID EMAIL ERROR").normalizeEmail(),
-    body("password").isLength({ min: 6 }).withMessage("PASSWORD LENGTH ERROR"),
+    // body("email").isEmail().withMessage("INVALID EMAIL ERROR").normalizeEmail(),
+    // body("password").isLength({ min: 6 }).withMessage("PASSWORD LENGTH ERROR"),
     body("phoneNumber")
       .isMobilePhone()
       .withMessage("INVALID PHONE NUMBER ERROR"),
-    body("referredBy")
-      .optional()
-      .isLength({ min: 7, max: 7 })
-      .withMessage("INVALID REFERRAL CODE ERROR"),
+    // body("referredBy")
+    //   .optional()
+    //   .isLength({ min: 7, max: 7 })
+    //   .withMessage("INVALID REFERRAL CODE ERROR"),
   ],
-  generateReferralCode,
+  // generateReferralCode,
   async (req, res) => {
     try {
       // Handle validation errors
@@ -38,11 +38,11 @@ router.post(
         //this will throw error with above mentioned messages
       }
 
-      const { email, password, phoneNumber } = req.body;
+      const { phoneNumber } = req.body;
 
       // Check if the user already exists
       const existingUser = await User.findOne({
-        $or: [{ email }, { phone: phoneNumber }],
+        phone: phoneNumber,
       });
 
       if (existingUser) {
@@ -51,28 +51,28 @@ router.post(
         );
       }
 
-      // Hash the password
-      const hashedPassword = await bcrypt.hash(password, 5); // Using salt rounds
+      // // Hash the password
+      // const hashedPassword = await bcrypt.hash(password, 5); // Using salt rounds
 
-      // Create a new user in the database
-      const newUser = new User({
-        email,
-        password: hashedPassword,
-        phone: phoneNumber,
-        referralCode: req.referralCode,
-        referredBy: req?.referredByUser ? req.referredByUser._id : null,
-      });
+      // // Create a new user in the database
+      // const newUser = new User({
+      //   email,
+      //   password: hashedPassword,
+      //   phone: phoneNumber,
+      //   referralCode: req.referralCode,
+      //   referredBy: req?.referredByUser ? req.referredByUser._id : null,
+      // });
 
-      // Save the new user
-      const savedUser = await newUser.save();
-      if (!savedUser) {
-        throw new Error(
-          JSON.stringify({
-            status: 500,
-            message: "FAILED TO SAVE USER IN DATABASE ERROR",
-          })
-        );
-      }
+      // // Save the new user
+      // const savedUser = await newUser.save();
+      // if (!savedUser) {
+      //   throw new Error(
+      //     JSON.stringify({
+      //       status: 500,
+      //       message: "FAILED TO SAVE USER IN DATABASE ERROR",
+      //     })
+      //   );
+      // }
 
       //Generate OTP
       const otpCode = otpGenerator.generate(4, {
@@ -95,7 +95,7 @@ router.post(
       //If already exists,update or else create new one
       const savedOTP = await OTP.findOneAndUpdate(
         {
-          userId: savedUser._id,
+          phone: phoneNumber,
           purpose: "registration",
         },
         {
@@ -104,7 +104,7 @@ router.post(
         },
         {
           new: true,
-          upsert: true,
+          upsert: true, //if not exists create one
           setDefaultsOnInsert: true,
         }
       );
@@ -116,8 +116,7 @@ router.post(
       }
 
       res.status(200).json({
-        message: "User registered successfully. OTP sent to user.",
-        userId: savedUser._id,
+        message: "OTP sent to user.",
       });
     } catch (error) {
       console.error("Error during signup and OTP generation:", error);
@@ -130,11 +129,19 @@ router.post(
 router.post(
   "/signup/validate-otp",
   [
-    // Validate and sanitize inputs
-    body("userId").isMongoId().withMessage("INVALID USER ID ERROR"),
+    //Validate and sanitize inputs
+    body("email").isEmail().withMessage("INVALID EMAIL ERROR").normalizeEmail(),
+    body("password").isLength({ min: 6 }).withMessage("PASSWORD LENGTH ERROR"),
+    body("phoneNumber")
+      .isMobilePhone()
+      .withMessage("INVALID PHONE NUMBER ERROR"),
+    body("referralCode")
+      .optional()
+      .isLength({ min: 7, max: 7 })
+      .withMessage("INVALID REFERRAL CODE ERROR"),
     body("otp").isLength({ min: 4, max: 4 }).withMessage("INVALID OTP ERROR"),
-    body("purpose").equals("registration").withMessage("INVALID PURPOSE ERROR"),
   ],
+  generateReferralCode,
   async (req, res) => {
     try {
       // Handle validation errors
@@ -145,11 +152,18 @@ router.post(
         );
       }
 
-      const { userId, otp } = req.body;
+      const { email, password, phoneNumber, otp } = req.body;
+
+      //check if user exists with the email
+      const emailExists = await User.exists({ email });
+      if (emailExists) {
+        throw new Error(
+          JSON.stringify({ status: 400, message: "EMAIL ALREADY EXISTS" })
+        );
+      }
 
       // Find the OTP in the database
-      const foundOTP = await OTP.findOne({ userId, code: otp });
-
+      const foundOTP = await OTP.findOne({ phone: phoneNumber, code: otp });
       if (!foundOTP) {
         throw new Error(
           JSON.stringify({
@@ -159,25 +173,34 @@ router.post(
         );
       }
 
-      // Update user's isVerified status to true
-      const updatedUser = await User.findByIdAndUpdate(
-        userId,
-        { isVerified: true },
-        { new: true }
-      );
+      // Hash the password
+      const hashedPassword = await bcrypt.hash(password, 5); // Using salt rounds
 
-      if (!updatedUser) {
+      // Create a new user in the database
+      const newUser = new User({
+        email,
+        password: hashedPassword,
+        phone: phoneNumber,
+        uid: req.uid, //uid and referralCode are generated in middleware and attached to req object
+        referralCode: req.referralCode,
+        referredBy: req?.referredByUser ? req.referredByUser._id : null,
+        isVerified: true,
+      });
+
+      // Save the new user
+      const savedUser = await newUser.save();
+      if (!savedUser) {
         throw new Error(
           JSON.stringify({
             status: 500,
-            message: "FAILED TO UPDATE USER STATUS ERROR",
+            message: "FAILED TO SAVE USER IN DATABASE ERROR",
           })
         );
       }
 
       // Generate a token with userId inside token
       const token = jwt.sign(
-        { userId: updatedUser._id },
+        { userId: savedUser._id, uid: savedUser.uid },
         process.env.JWT_SECRET,
         { expiresIn: "7d" }
       );
@@ -235,9 +258,11 @@ router.post(
       }
 
       //check if verified through otp
-      const isVerified=user.isVerified;
-      if(!isVerified){
-        throw new Error(JSON.stringify({status:400,message:'USER UNVERIFIED ERROR'}));
+      const isVerified = user.isVerified;
+      if (!isVerified) {
+        throw new Error(
+          JSON.stringify({ status: 400, message: "USER UNVERIFIED ERROR" })
+        );
       }
       // Generate JWT token with expiry of 7 days
       const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
@@ -407,7 +432,7 @@ router.post(
       }
 
       const { otp, newPassword } = req.body;
-      const userId = req.userId; // validateToken sets 
+      const userId = req.userId; // validateToken sets
 
       // Find the OTP in the database
       const foundOTP = await OTP.findOne({
