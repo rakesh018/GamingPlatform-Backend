@@ -12,7 +12,7 @@ const getCompletedWithdrawals = async (req, res) => {
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
-      .select("userId amount status bankName accountNumber ifscCode createdAt");
+      .select("userId uid amount status bankName accountNumber ifscCode createdAt");
 
     // Count total documents with status 'completed' and sum their amounts
     const totalWithdrawals = await Withdrawal.aggregate([

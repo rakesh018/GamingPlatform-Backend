@@ -1,6 +1,10 @@
 const AutoDeposit = require("../../models/autoDeposit");
 const axios=require('axios');
 const makeAutoPayment = async (req, res) => {
+  //Currently auto payment gateway is not yet configured so no response from here
+  return res.json({message:'Automatic payment will be available soon'});
+
+  
   //Makes an order order and gets link to qr code to which user can pay
   // {
   //     phoneNumber:Number,amount:Number,type:String(deposit,withdrawal)

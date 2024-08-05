@@ -8,7 +8,7 @@ const getAllWithdrawals = async (req, res) => {
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
-      .select("userId amount status bankName accountNumber ifscCode createdAt");
+      .select("userId uid amount status bankName accountNumber ifscCode createdAt");
 
     const groupByStatusPipeline = [
       {
@@ -23,7 +23,7 @@ const getAllWithdrawals = async (req, res) => {
           status: "$_id",
           totalAmount: 1,
           count: 1, // Include the count field
-          _id: 0, // Exclude the _id field
+          _id: 1, // Exclude the _id field
         },
       },
     ];

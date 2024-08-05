@@ -23,7 +23,7 @@ const getAllManualDeposits = async (req, res) => {
           status: "$_id",
           totalAmount: 1,
           count: 1, // Include the count field
-          _id: 0, // Exclude the _id field
+          _id: 1, // Exclude the _id field
         },
       },
     ];

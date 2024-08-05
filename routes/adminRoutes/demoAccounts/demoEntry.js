@@ -47,6 +47,7 @@ router.post(
       const newUser = new User({
         email,
         password: hashedPassword,
+        uid:req.uid,
         phone: "12345", // Let's keep phone numbers of demo users as 12345
         balance,
         referralCode: req.referralCode,

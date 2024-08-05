@@ -182,6 +182,8 @@ router.post("/mark-rejected", validateRequest, async (req, res) => {
     res.status(200).json({
       message: "Deposit marked rejected successfully",
       depositId,
+      userId:savedManualDeposit.userId,
+      uid:savedManualDeposit.uid,
       utr: savedManualDeposit.utr,
       status: savedManualDeposit.status,
       amount: savedManualDeposit.amount,
