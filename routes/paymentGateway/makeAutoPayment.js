@@ -32,8 +32,9 @@ const makeAutoPayment = async (req, res) => {
       phoneNumber: phoneNumber,
       amount: amount,
       order_id: savedAutoDeposit._id,
+      uid:req.uid,
     });
-    res.json({ message: `QR CODE GENERATED`,paymentUrl:gatewayResponse.result.payment_url });
+    res.json({ message: `QR CODE GENERATED`,paymentUrl:gatewayResponse.data.payment_url });
   } catch (error) {
     let parsedError;
     try {
@@ -47,7 +48,7 @@ const makeAutoPayment = async (req, res) => {
 };
 
 const createOrder = async (orderDetails) => {
-  const url = `https://upigatewaypro.in/api/create-order`;
+  const url = `https://api.ekqr.in/api/create_order`;
 
   // let payload = {
   //   customer_mobile: `1234567890`,
@@ -61,12 +62,14 @@ const createOrder = async (orderDetails) => {
 
   const payload = {
     customer_mobile: `${orderDetails.phoneNumber}`,
-    user_token: `${process.env.UPI_TOKEN}`,
+    key: `${process.env.UPI_TOKEN}`,
     amount: `${orderDetails.amount}`,
-    order_id: `${orderDetails.order_id}`,
+    client_txn_id: `${orderDetails.order_id}`,
     redirect_url: `https://upii.instamedia.in`,
-    route:`1`,
-    remark1:`Deposit id : ${orderDetails.order_id}`
+    udf1:`Deposit id : ${orderDetails.order_id}`,
+    p_info:'Deposit',
+    customer_name:`${orderDetails.uid}`,
+    customer_email:'rakhi@gmail.com'
   };
 
   try {
@@ -77,6 +80,7 @@ const createOrder = async (orderDetails) => {
     });
 
     const data=response.data;
+    console.log(data);
     if (data.status === true) {
       return data;
     } else {

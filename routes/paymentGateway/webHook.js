@@ -7,6 +7,7 @@ const webHook = async (req, res) => {
   // {
   //     order_id,status,remarks are received on this route by payment gateway upon successful payment
   // }
+  console.log(req.body);
   const { order_id, status, remark1 } = req.body;
   //Update the AutoDeposit as completed and increasing the balance of the user
   const session = await mongoose.startSession();

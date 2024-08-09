@@ -1,18 +1,22 @@
 config:
   target: http://localhost:3000
   phases:
-    - duration: 30
-      arrivalRate: 20
+    - duration: 2
+      arrivalRate: 2
       name: Spike phase
+  processor: "./processors.js"  # Reference to the custom JavaScript processor
+  payload:
+    # You can also specify other data here if needed
 scenarios:
   - flow:
+      - function: "setRandomToken"
       - post:
           url: "/bets/makeBet"
           headers:
-            Authorization: "Bearer "
+            Authorization: "{{ token }}"  # Use the token set by the function
           json:
             gameName: "coinFlip"
             roundDuration: 1
             betAmount: 10
             choice: "tail"
-            
+

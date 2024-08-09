@@ -2,7 +2,7 @@
 <html>
 <head>
   <title>Socket.io Test</title>
-  <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+  <script src="http://16.170.225.151:3000/socket.io/socket.io.js"></script>
 </head>
 <body>
   <h1>Socket.io Client</h1>
@@ -44,7 +44,7 @@
 
   <script>
     const token = localStorage.getItem('token');
-    const socket = io('http://localhost:3000/user', {
+    const socket = io('http://16.170.225.151:3000/user', {
       auth: {
         token: `Bearer ${token}`
       }
@@ -99,7 +99,7 @@
       console.log(`Game: ${gameName}, Round Duration: ${roundDuration} minutes, Bet Amount: ${betAmount}, Bet Choice: ${betChoice}`);
 
       try {
-        const response = await fetch('http://localhost:3000/bets/makeBet', {
+        const response = await fetch('http://16.170.225.151:3000/bets/makeBet', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

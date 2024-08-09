@@ -2,7 +2,7 @@
 <html>
 <head>
   <title>Admin Panel - Socket.io</title>
-  <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+  <script src="http://16.170.225.151:3000/socket.io/socket.io.js"></script>
 </head>
 <body>
   <h1>Admin Panel</h1>
@@ -35,7 +35,7 @@
 
   <script>
     const token = localStorage.getItem('adminToken');
-    const socket = io('http://localhost:3000/admin', {
+    const socket = io('http://16.170.225.151:3000/admin', {
       auth: {
         token: `Bearer ${token}`
       }

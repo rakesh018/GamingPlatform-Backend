@@ -375,7 +375,7 @@ router.get("/forgot-password/get-otp", validateToken, async (req, res) => {
     //If already exists,update or else create new one
     const savedOTP = await OTP.findOneAndUpdate(
       {
-        userId: user._id,
+        phone: req.phone,
         purpose: "forgotPassword",
       },
       {
@@ -436,7 +436,7 @@ router.post(
 
       // Find the OTP in the database
       const foundOTP = await OTP.findOne({
-        userId,
+        phone:req.phone,
         code: otp,
         purpose: "forgotPassword",
       });
