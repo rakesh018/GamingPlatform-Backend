@@ -7,86 +7,122 @@ const { gameTimers } = require("./timer");
 const User = require("../../models/userModels");
 const redisClient = require("../../configs/redisClient");
 const otpGenerator = require("otp-generator");
+const {body,validationResult}=require('express-validator');
 
-router.post("/makeBet", validateToken, validateBet, async (req, res) => {
-  let { gameName, roundDuration, betAmount, betChoice } = req.body;
-  const userId = req.userId; // from token validation
-  const mappedChoice = mapChoice(gameName, betChoice);
-  betAmount = parseFloat(betAmount);
-  const queue = activeBets[gameName][roundDuration];
-  const round = gameTimers[gameName].find((r) => r.duration === roundDuration);
-  if (req.isDemo === false) {
-    //not considering demo user bets into regular flow
-    round[`betAmount${mappedChoice}`] += betAmount;
-  }
-
-  // Start a session and transaction
-  const session = await User.startSession();
-  session.startTransaction();
-
-  try {
-    // Find the user with a session
-    const user = await User.findById(userId).session(session);
-    if (!user) {
-      throw new Error(
-        JSON.stringify({ status: 404, message: "User not found" })
-      );
+router.post(
+  "/makeBet",
+  validateToken,
+  [
+    body("gameName")
+      .notEmpty()
+      .withMessage("Game name is required")
+      .isIn(["stockTrader", "coinFlip"])
+      .withMessage("Invalid game name"),
+    body("roundDuration")
+      .notEmpty()
+      .withMessage("Round duration is required")
+      .isIn([1, 3, 5, 10])
+      .withMessage("Invalid round duration"),
+    body("betAmount")
+      .notEmpty()
+      .withMessage("Bet amount is required")
+      .isFloat({ gt: 0 })
+      .withMessage("Bet amount must be a positive number"),
+    body("betChoice")
+      .notEmpty()
+      .withMessage("Bet choice is required")
+      .isIn(["head", "tail", "up", "down"])
+      .withMessage("Invalid bet choice"),
+  ],
+  validateBet,
+  async (req, res) => {
+    //error management
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array()[0].msg });
     }
 
-    // Check total balance (balance + withdrawableBalance)
-    const totalBalance = user.balance + user.withdrawableBalance;
-    if (totalBalance < betAmount) {
-      throw new Error(
-        JSON.stringify({ status: 400, message: "Insufficient balance" })
-      );
-    }
-
-    // Deduct from withdrawableBalance first, then from balance if needed
-    let remainingAmount = betAmount;
-    if (user.withdrawableBalance >= remainingAmount) {
-      user.withdrawableBalance -= remainingAmount;
-      remainingAmount = 0;
-    } else {
-      remainingAmount -= user.withdrawableBalance;
-      user.withdrawableBalance = 0;
-      user.balance -= remainingAmount;
-    }
-
-    // Save the user with the updated balances within the transaction
-    await user.save({ session });
-
-    // Add the bet to the respective queue
-    await queue.add("bet", { betAmount, mappedChoice, userId });
-
-    //cache bet slip
-    await cacheBetSlip(
-      userId,
-      gameName,
-      roundDuration,
-      betAmount,
-      mappedChoice,
-      req.remainingTime
+    let { gameName, roundDuration, betAmount, betChoice } = req.body;
+    const userId = req.userId; // from token validation
+    const mappedChoice = mapChoice(gameName, betChoice);
+    betAmount = parseFloat(betAmount);
+    const queue = activeBets[gameName][roundDuration];
+    const round = gameTimers[gameName].find(
+      (r) => r.duration === roundDuration
     );
-    // Commit the transaction
-    await session.commitTransaction();
-    session.endSession();
-    res.status(200).json({
-      updatedBalance: user.balance + user.withdrawableBalance,
-      message: `Received ${betAmount} on ${gameName} for round ${roundDuration}`,
-    });
-  } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
-    let parsedError;
-    try {
-      parsedError = JSON.parse(error.message);
-    } catch (error) {
-      parsedError = { status: 500, message: "INTERNAL SERVER ERROR" };
+    if (req.isDemo === false) {
+      //not considering demo user bets into regular flow
+      round[`betAmount${mappedChoice}`] += betAmount;
     }
-    console.error(error);
-    res.status(parsedError.status).json(parsedError.message);
+
+    // Start a session and transaction
+    const session = await User.startSession();
+    session.startTransaction();
+
+    try {
+      // Find the user with a session
+      const user = await User.findById(userId).session(session);
+      if (!user) {
+        throw new Error(
+          JSON.stringify({ status: 404, message: "User not found" })
+        );
+      }
+
+      // Check total balance (balance + withdrawableBalance)
+      const totalBalance = user.balance + user.withdrawableBalance;
+      if (totalBalance < betAmount) {
+        throw new Error(
+          JSON.stringify({ status: 400, message: "Insufficient balance" })
+        );
+      }
+
+      // Deduct from withdrawableBalance first, then from balance if needed
+      let remainingAmount = betAmount;
+      if (user.withdrawableBalance >= remainingAmount) {
+        user.withdrawableBalance -= remainingAmount;
+        remainingAmount = 0;
+      } else {
+        remainingAmount -= user.withdrawableBalance;
+        user.withdrawableBalance = 0;
+        user.balance -= remainingAmount;
+      }
+
+      // Save the user with the updated balances within the transaction
+      await user.save({ session });
+
+      // Add the bet to the respective queue
+      await queue.add("bet", { betAmount, mappedChoice, userId });
+
+      //cache bet slip
+      await cacheBetSlip(
+        userId,
+        gameName,
+        roundDuration,
+        betAmount,
+        mappedChoice,
+        req.remainingTime
+      );
+      // Commit the transaction
+      await session.commitTransaction();
+      session.endSession();
+      res.status(200).json({
+        updatedBalance: user.balance + user.withdrawableBalance,
+        message: `Received ${betAmount} on ${gameName} for round ${roundDuration}`,
+      });
+    } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
+      let parsedError;
+      try {
+        parsedError = JSON.parse(error.message);
+      } catch (error) {
+        parsedError = { status: 500, message: "INTERNAL SERVER ERROR" };
+      }
+      console.error(error);
+      res.status(parsedError.status).json(parsedError.message);
+    }
   }
-});
+);
 
 const mapChoice = (gameName, betChoice) => {
   // Maps head to 1, tail to 0, and up to 1, and down to 0
@@ -118,7 +154,7 @@ const cacheBetSlip = async (
 
 router.get("/get-bet-slips", validateToken, async (req, res) => {
   try {
-    const userId=req.userId;
+    const userId = req.userId;
     const pattern = `betSlips:${userId}:*`;
     // Fetch all keys matching the pattern
     const keys = await redisClient.keys(pattern);
