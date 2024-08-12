@@ -243,7 +243,7 @@ router.post(
         $or: [{ email: emailOrPhone }, { phone: emailOrPhone }],
       });
 
-      if (!user) {
+      if (!user || user.isRestricted) {
         throw new Error(
           JSON.stringify({ status: 404, message: "USER NOT FOUND ERROR" })
         );
