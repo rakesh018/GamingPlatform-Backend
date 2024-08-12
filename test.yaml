@@ -1,22 +1,15 @@
 config:
-  target: http://localhost:3000
+  target: "http://16.170.225.151:3000" # Replace with your API endpoint
   phases:
-    - duration: 2
-      arrivalRate: 2
-      name: Spike phase
-  processor: "./processors.js"  # Reference to the custom JavaScript processor
-  payload:
-    # You can also specify other data here if needed
-scenarios:
-  - flow:
-      - function: "setRandomToken"
-      - post:
-          url: "/bets/makeBet"
-          headers:
-            Authorization: "{{ token }}"  # Use the token set by the function
-          json:
-            gameName: "coinFlip"
-            roundDuration: 1
-            betAmount: 10
-            choice: "tail"
+    - duration: 30
+      arrivalRate: 60 # Number of virtual users per second
+  defaults:
+    headers:
+      Content-Type: "application/json"
+      Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NmIyM2JiMjQ0NDYzYzk4OWE3ZDNhYzAiLCJ1aWQiOiJXTTgxNDQ0OTEiLCJpYXQiOjE3MjMyODcwNTksImV4cCI6MTcyMzg5MTg1OX0.L4hJ7XWLoz8ifDa8sgb0JXSMB2sfB5Txqjs8RP3eGv8" # Replace with your actual token
 
+scenarios:
+  - name: "Test get-profile route with token"
+    flow:
+      - get:
+          url: "/profile/get-all-notifications"

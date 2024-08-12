@@ -7,7 +7,7 @@ async function computeAllTimeLeaderboard() {
       const leaderboard = await Bet.aggregate([
         {
           $group: {
-            _id: "$userId",
+            _id: "$uid",
             totalWinnings: { $sum: "$winningAmount" }
           }
         },
@@ -47,7 +47,7 @@ async function computeDailyLeaderboard() {
       },
       {
         $group: {
-          _id: "$userId",
+          _id: "$uid",
           totalWinnings: { $sum: "$winningAmount" },
         },
       },

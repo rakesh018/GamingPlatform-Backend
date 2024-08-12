@@ -2,7 +2,7 @@
 <html>
 <head>
   <title>Socket.io Test</title>
-  <script src="http://16.170.225.151:3000/socket.io/socket.io.js"></script>
+  <script src="https://server.trademax1.com/socket.io/socket.io.js"></script>
 </head>
 <body>
   <h1>Socket.io Client</h1>
@@ -44,7 +44,7 @@
 
   <script>
     const token = localStorage.getItem('token');
-    const socket = io('http://16.170.225.151:3000/user', {
+    const socket = io('wss://server.trademax1.com/user', {
       auth: {
         token: `Bearer ${token}`
       }
@@ -99,7 +99,7 @@
       console.log(`Game: ${gameName}, Round Duration: ${roundDuration} minutes, Bet Amount: ${betAmount}, Bet Choice: ${betChoice}`);
 
       try {
-        const response = await fetch('http://16.170.225.151:3000/bets/makeBet', {
+        const response = await fetch('https://server.trademax1.com/bets/makeBet', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -132,7 +132,7 @@
 
       try {
         // Request a presigned URL from the backend
-        const response = await fetch('http://localhost:3000/payments/manual-payment/generate-psu', {
+        const response = await fetch('https://server.trademax1.com/payments/manual-payment/generate-psu', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -169,7 +169,7 @@
         alert('File uploaded successfully');
         
         // Optionally, you can send the file key to your backend to store it in the database
-        const saveResponse = await fetch('http://localhost:3000/payments/manual-payment/save-key', {
+        const saveResponse = await fetch('https://server.trademax1.com/payments/manual-payment/save-key', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
