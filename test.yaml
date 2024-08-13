@@ -1,12 +1,12 @@
 config:
-  target: "http://16.170.225.151:3000" # Replace with your API endpoint
+  target: "https://server.trademax1.com" # Replace with your API endpoint
   phases:
     - duration: 30
-      arrivalRate: 60 # Number of virtual users per second
+      arrivalRate: 100 # Number of virtual users per second
   defaults:
     headers:
       Content-Type: "application/json"
-      Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NmIyM2JiMjQ0NDYzYzk4OWE3ZDNhYzAiLCJ1aWQiOiJXTTgxNDQ0OTEiLCJpYXQiOjE3MjMyODcwNTksImV4cCI6MTcyMzg5MTg1OX0.L4hJ7XWLoz8ifDa8sgb0JXSMB2sfB5Txqjs8RP3eGv8" # Replace with your actual token
+      Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NmIxMGVhN2UzMDM5NTVkNjQzZmUyMWIiLCJ1aWQiOiJXTTU4Mzg5NjYiLCJpYXQiOjE3MjM0OTYxMzIsImV4cCI6MTcyNDEwMDkzMn0.y3NsxsjLcvNuz-mN60DGuiiBamCv3W800NDNh0r4SzA" # Replace with your actual token
 
 scenarios:
   - name: "Test get-profile route with token"

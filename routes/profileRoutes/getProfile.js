@@ -8,7 +8,11 @@ const getProfile=async (req, res) => {
         if (!getUserFromDB) {
             res.status(404).json({ error: 'USER NOT FOUND ERROR' });
         }
-        res.status(200).json(getUserFromDB);
+        const totalBalance=getUserFromDB.balance+getUserFromDB.withdrawableBalance;
+        res.status(200).json({
+            ...getUserFromDB._doc, // Spread the user data
+            balance: totalBalance // Add the total balance
+        });
     } catch (err) {
         console.log(`Error getting Profile Details : ${err}`);
         res.status(500).json({ error: "Internal Server Error" });
