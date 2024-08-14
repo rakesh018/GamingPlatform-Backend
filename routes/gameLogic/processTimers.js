@@ -66,10 +66,10 @@ const broadCastResults = async (gameName, roundDuration, roundResult, adminNames
     // Push the new round result to the Redis list
     await redisClient.lPush(key, JSON.stringify(roundResult));
 
-    // Trim the list to only keep the last 4 entries
+    // Trim the list to only keep the last 10 entries
     await redisClient.lTrim(key, 0, 10);
 
-    // Retrieve the latest 4 results from the list
+    // Retrieve the latest 10 results from the list
     const results = await redisClient.lRange(key, 0, 10);
 
     // Parse the results from JSON

@@ -7,7 +7,7 @@ const { gameTimers } = require("./timer");
 const User = require("../../models/userModels");
 const redisClient = require("../../configs/redisClient");
 const otpGenerator = require("otp-generator");
-const {body,validationResult}=require('express-validator');
+const { body, validationResult } = require("express-validator");
 
 router.post(
   "/makeBet",
@@ -181,6 +181,25 @@ router.get("/get-bet-slips", validateToken, async (req, res) => {
   } catch (error) {
     console.error("Error retrieving live bets:", error);
     res.status(500).json({ error: "INTERNAL SERVER ERROR" });
+  }
+});
+router.get("/get-rounds-history", validateToken, async (req, res) => {
+  try {
+    const { gameName, roundDuration } = req.body;
+    if (!gameName || !roundDuration) {
+      res.json({ parsedResults: [] });
+    }
+    const key = `roundResults:${gameName}:${roundDuration}`;
+
+    // Retrieve the latest 10 results from the list
+    const results = await redisClient.lRange(key, 0, 10);
+
+    // Parse the results from JSON
+    const parsedResults = results.map((result) => JSON.parse(result));
+
+    res.status(200).json({ parsedResults });
+  } catch (error) {
+    res.json({ parsedResults: [] });
   }
 });
 module.exports = router;
