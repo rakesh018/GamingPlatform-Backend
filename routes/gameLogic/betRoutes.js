@@ -183,9 +183,9 @@ router.get("/get-bet-slips", validateToken, async (req, res) => {
     res.status(500).json({ error: "INTERNAL SERVER ERROR" });
   }
 });
-router.get("/get-rounds-history", validateToken, async (req, res) => {
+router.get("/get-rounds-history/:gameName/:roundDuration", validateToken, async (req, res) => {
   try {
-    const { gameName, roundDuration } = req.body;
+    const {gameName,roundDuration}=req.params;
     if (!gameName || !roundDuration) {
       res.json({ parsedResults: [] });
     }
