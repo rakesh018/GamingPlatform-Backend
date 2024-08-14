@@ -39,7 +39,7 @@ router.post(
     //error management
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array()[0].msg });
+      throw new Error(JSON.stringify({status:400,error:errors.array()[0].msg}))
     }
 
     let { gameName, roundDuration, betAmount, betChoice } = req.body;
