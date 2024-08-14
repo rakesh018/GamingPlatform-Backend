@@ -26,7 +26,7 @@ router.post(
     body("betAmount")
       .notEmpty()
       .withMessage("Bet amount is required")
-      .isFloat({ gt: 0 })
+      .isFloat({ gt: 9 })
       .withMessage("Bet amount must be a positive number"),
     body("betChoice")
       .notEmpty()
