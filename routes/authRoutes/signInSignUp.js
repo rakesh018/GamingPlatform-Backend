@@ -343,7 +343,7 @@ router.put(
 
 router.get("/forgot-password/get-otp", async (req, res) => {
   try {
-    const phoneNumber=req?.body;
+    const {phoneNumber}=req?.body;
     if(!phoneNumber){
       throw new Error(JSON.stringify({status:400,message:'Phone number required'}))
     }
@@ -377,7 +377,7 @@ router.get("/forgot-password/get-otp", async (req, res) => {
     //If already exists,update or else create new one
     const savedOTP = await OTP.findOneAndUpdate(
       {
-        phone: req.phone,
+        phone: phoneNumber,
         purpose: "forgotPassword",
       },
       {
@@ -417,7 +417,7 @@ router.post(
   "/forgot-password/validate-otp",
   [
     // Validate and sanitize inputs
-    body('phoneNumber').isMobilePhone().withMessage('Phone number required'),
+    body('phoneNumber').isString().withMessage('Phone number required'),
     body("otp").isLength({ min: 4, max: 4 }).withMessage("INVALID OTP ERROR"),
     body("newPassword")
       .isLength({ min: 6 })
