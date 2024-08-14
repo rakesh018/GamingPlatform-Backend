@@ -341,12 +341,14 @@ router.put(
   }
 );
 
-router.get("/forgot-password/get-otp", validateToken, async (req, res) => {
+router.get("/forgot-password/get-otp", async (req, res) => {
   try {
-    const userId = req.userId;
-
+    const phoneNumber=req?.body;
+    if(!phoneNumber){
+      throw new Error(JSON.stringify({status:400,message:'Phone number required'}))
+    }
     // Fetch the user by userId
-    const user = await User.findById(userId);
+    const user = await User.findOne({phone:phoneNumber});
 
     if (!user) {
       throw new Error(
@@ -413,9 +415,9 @@ router.get("/forgot-password/get-otp", validateToken, async (req, res) => {
 
 router.post(
   "/forgot-password/validate-otp",
-  validateToken,
   [
     // Validate and sanitize inputs
+    body('phoneNumber').isMobilePhone().withMessage('Phone number required'),
     body("otp").isLength({ min: 4, max: 4 }).withMessage("INVALID OTP ERROR"),
     body("newPassword")
       .isLength({ min: 6 })
@@ -431,12 +433,11 @@ router.post(
         );
       }
 
-      const { otp, newPassword } = req.body;
-      const userId = req.userId; // validateToken sets
+      const { otp, newPassword ,phoneNumber} = req.body;
 
       // Find the OTP in the database
       const foundOTP = await OTP.findOne({
-        phone:req.phone,
+        phone:phoneNumber,
         code: otp,
         purpose: "forgotPassword",
       });
@@ -454,8 +455,8 @@ router.post(
       const hashedPassword = await bcrypt.hash(newPassword, 5); // Using 5 salt rounds
 
       // Update the user's password
-      const updatedUser = await User.findByIdAndUpdate(
-        userId,
+      const updatedUser = await User.findOneAndUpdate(
+        {phone:phoneNumber},
         { password: hashedPassword },
         { new: true }
       );
