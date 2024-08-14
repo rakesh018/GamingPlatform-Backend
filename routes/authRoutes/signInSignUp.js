@@ -341,7 +341,7 @@ router.put(
   }
 );
 
-router.get("/forgot-password/get-otp", async (req, res) => {
+router.post("/forgot-password/get-otp", async (req, res) => {
   try {
     const {phoneNumber}=req?.body;
     if(!phoneNumber){
