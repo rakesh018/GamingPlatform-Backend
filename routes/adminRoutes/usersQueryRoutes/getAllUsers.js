@@ -9,7 +9,7 @@ const getAllUsers = async (req, res) => {
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
-      .select("_id phone email uid isVerified isRestricted createdAt balance withdrawableBalance");
+      .select("_id phone email uid isVerified isRestricted createdAt balance withdrawableBalance userType");
 
     const totalUsers = await User.countDocuments();
 
