@@ -97,14 +97,14 @@ router.post("/mark-completed", validateRequest, async (req, res) => {
     };
     await notificationsQueue.add("notification", notificationPayload);
 
-    // Delete image from S3
-    if (savedManualDeposit.s3Key) {
-      const s3Params = {
-        Bucket: process.env.AWS_BUCKET,
-        Key: savedManualDeposit.s3Key,
-      };
-      await s3.deleteObject(s3Params).promise();
-    }
+    // // Delete image from S3
+    // if (savedManualDeposit.s3Key) {
+    //   const s3Params = {
+    //     Bucket: process.env.AWS_BUCKET,
+    //     Key: savedManualDeposit.s3Key,
+    //   };
+    //   await s3.deleteObject(s3Params).promise();
+    // }
     await session.commitTransaction();
     session.endSession();
 
