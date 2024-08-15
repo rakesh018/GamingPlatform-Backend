@@ -1,8 +1,9 @@
 const ManualDeposit = require("../../../models/manualDeposit");
+
 const getAllManualDeposits = async (req, res) => {
   try {
     const page = parseInt(req.query?.page) || 1;
-    const limit = process.env.PAGE_LIMIT;
+    const limit = parseInt(process.env.PAGE_LIMIT) || 10; // Ensure limit is a number
 
     const paginatedManualDeposits = await ManualDeposit.find()
       .sort({ createdAt: -1 })
@@ -23,26 +24,29 @@ const getAllManualDeposits = async (req, res) => {
           status: "$_id",
           totalAmount: 1,
           count: 1, // Include the count field
-          _id: 1, // Exclude the _id field
+          _id: 0, // Exclude the _id field
         },
       },
     ];
-    const groupByStatusData = await ManualDeposit.aggregate(
-      groupByStatusPipeline
-    );
-    //if there are no entries for any status type, we add them here
-    //also we calculate total amount from all kind of statuses
+
+    const groupByStatusData = await ManualDeposit.aggregate(groupByStatusPipeline);
+
+    // Initialize segregatedManualDeposits with default values
     let segregatedManualDeposits = {
       completed: { count: 0, totalAmount: 0 },
       pending: { count: 0, totalAmount: 0 },
       total: { count: 0, totalAmount: 0 },
       rejected: { count: 0, totalAmount: 0 },
     };
-    groupByStatusData.forEach((i) => {
-      segregatedManualDeposits[i.status].count += i.count;
-      segregatedManualDeposits[i.status].totalAmount += i.totalAmount;
-      segregatedManualDeposits.total.count += i.count;
-      segregatedManualDeposits.total.totalAmount += i.totalAmount;
+
+    groupByStatusData.forEach((item) => {
+      const status = item.status || 'unknown'; // Default to 'unknown' if status is undefined
+      if (segregatedManualDeposits[status] !== undefined) {
+        segregatedManualDeposits[status].count += item.count || 0;
+        segregatedManualDeposits[status].totalAmount += item.totalAmount || 0;
+        segregatedManualDeposits.total.count += item.count || 0;
+        segregatedManualDeposits.total.totalAmount += item.totalAmount || 0;
+      }
     });
 
     res.status(200).json({
@@ -53,11 +57,9 @@ const getAllManualDeposits = async (req, res) => {
     });
   } catch (error) {
     let parsedError = { status: 500, message: `INTERNAL SERVER ERROR` };
-    console.error(
-      `Error occured during fetching all users for admin : `,
-      error
-    );
+    console.error(`Error occurred during fetching all manual deposits:`, error);
     res.status(parsedError.status).json({ error: parsedError.message });
   }
 };
+
 module.exports = getAllManualDeposits;
