@@ -9,6 +9,7 @@ router.get("/get-all-queries", validateAdminToken, async (req, res) => {
     const limit = process.env.PAGE_LIMIT;
     const queries = await Query.find({ hasSeen: false })
       .sort({ createdAt: -1 }) // Sort by creation date, most recent first
+      .skip((page-1)*limit)
       .limit(limit)
       .select({ __v: 0, updatedAt: 0 }); // Limit the results to 10
     
