@@ -1,5 +1,6 @@
 const User = require("../../../models/userModels");
-const mongoose=require('../../../models/db');
+const mongoose = require('../../../models/db');
+
 const banUser = async (req, res) => {
   try {
     const userId = req.params?.userId;
@@ -8,24 +9,32 @@ const banUser = async (req, res) => {
         JSON.stringify({ status: 404, message: `INVALID USERID` })
       );
     }
-    //If the query parameter is objectId will use both else will use uid for searching
+    
+    // Check if userId is a valid ObjectId
     const isValidObjectId = mongoose.Types.ObjectId.isValid(userId);
-    const updatedUser = await User.findOneAndUpdate(
-      {
-        $or: [...(isValidObjectId ? [{ _id: userId }] : []), { uid: userId }],
-      },
-      { isRestricted: true },
-      { new: true }
-    );
 
-    if (!updatedUser) {
+    // Find the user based on userId or uid
+    const user = await User.findOne({
+      $or: [...(isValidObjectId ? [{ _id: userId }] : []), { uid: userId }],
+    });
+
+    if (!user) {
       throw new Error(
         JSON.stringify({ status: 400, message: `USER NOT FOUND ERROR` })
       );
     }
 
+    // Toggle the `isRestricted` value
+    const updatedUser = await User.findOneAndUpdate(
+      {
+        _id: user._id
+      },
+      { $set: { isRestricted: !user.isRestricted } },
+      { new: true }
+    );
+
     res.status(200).json({
-      message: `User banned successfully`,
+      message: `User restriction status updated successfully`,
       user: updatedUser,
     });
   } catch (error) {
