@@ -44,6 +44,7 @@ const updateUser = async (req, res) => {
       },
       {
         balance: amount,
+        withdrawableBalance:0,
         referralCommission: referralCommission
       },
       { new: true }
