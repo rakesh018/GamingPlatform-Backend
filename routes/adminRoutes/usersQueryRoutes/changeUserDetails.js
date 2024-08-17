@@ -4,24 +4,24 @@ const mongoose = require("../../../models/db");
 
 const updateUser = async (req, res) => {
   // Validation middleware
-  await body("amount")
+   [body("amount")
     .isFloat({ min: 0 })
     .withMessage("Amount must be a non-negative number")
-    .run(req);
+    .run(req),
   
-  await body("referralCommission")
+   body("referralCommission")
     .isFloat({ min: 1, max: 100 })
     .withMessage("Commission percentage must be between 1 and 100")
-    .run(req);
+    .run(req),]
 
   // Check for validation errors
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
+    return res.status(400).json({ errors: errors.array()[0].msg });
   }
 
   try {
-    const userId = req.query?.userId; // Get userId from query params
+    const userId = req.params?.userId; // Get userId from query params
     const { amount, referralCommission } = req.body;
 
     if (!userId) {
