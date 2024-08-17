@@ -116,7 +116,6 @@ router.post("/mark-completed", validateRequest, async (req, res) => {
       amount: depositedAmount,
       createdAt: savedManualDeposit.createdAt,
       utr: savedManualDeposit.utr,
-      url:savedManualDeposit.url
     });
   } catch (error) {
     await session.abortTransaction();
@@ -189,7 +188,6 @@ router.post("/mark-rejected", validateRequest, async (req, res) => {
       status: savedManualDeposit.status,
       amount: savedManualDeposit.amount,
       createdAt: savedManualDeposit.createdAt,
-      url:savedManualDeposit.url
     });
   } catch (error) {
     let parsedError;

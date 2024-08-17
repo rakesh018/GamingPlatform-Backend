@@ -8,6 +8,7 @@ const getBettingHistory = require('./getBettingHistory');
 const getLeaderBoardData = require('./getLeaderboardData');
 const getAllNotifications = require('./getAllNotifications');
 const markNotificationSeen = require('./markNotificationSeen');
+const makeQuery = require('./makeQuery');
 
 //Protected routes need jwt to get access so use a middleware
 router.get('/getProfile', validateToken,getProfile );
@@ -16,5 +17,5 @@ router.get('/get-betting-history',validateToken,getBettingHistory);
 router.get('/leaderboard/:type',validateToken,getLeaderBoardData);
 router.get('/get-all-notifications',validateToken,getAllNotifications);
 router.post('/mark-notification-seen',validateToken,markNotificationSeen);
-
+router.post('/make-query',validateToken,makeQuery);
 module.exports = router;
