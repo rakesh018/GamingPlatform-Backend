@@ -7,6 +7,9 @@ const withdrawalRequest = async (req, res) => {
   const userId = req.userId;
   const { amount, bankName, accountNumber, ifscCode } = req.body;
 
+  if(req.isDemo){
+    return res.status(400).json({error:'Demo accounts cannot withdraw'});
+  }
   // Start a session and Withdrawal
   const session = await mongoose.startSession();
   session.startTransaction();
