@@ -11,8 +11,9 @@ router.get("/get-all-queries", validateAdminToken, async (req, res) => {
       .sort({ createdAt: -1 }) // Sort by creation date, most recent first
       .limit(limit)
       .select({ __v: 0, updatedAt: 0 }); // Limit the results to 10
-
-    res.status(200).json({ message: "Queries fetched successfully", queries });
+    
+    const totalQueries=await Query.countDocuments({hasSeen:false});
+    res.status(200).json({ message: "Queries fetched successfully", queries ,totalPages:Math.ceil(totalQueries/limit)});
   } catch (error) {
     console.error(
       "Error occured while fetching all queries for admin : ",
