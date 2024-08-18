@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 const validateAdminToken = async (req, res, next) => {
   const token = req?.header("Authorization")?.split(" ")[1]; //'Bearer token
   if (!token) {
-    return res.status(401).json({ error: "ACCESS DENIED, NO TOKEN PROVIDED" });
+    return res.status(403).json({ error: "ACCESS DENIED, NO TOKEN PROVIDED" });
   }
 
   try {
@@ -11,7 +11,7 @@ const validateAdminToken = async (req, res, next) => {
     next();
   } catch (err) {
     console.log(`Error occured while validating token : ${err}`);
-    res.status(400).json({ error: "INVALID TOKEN.PLEASE LOGIN" });
+    res.status(403).json({ error: "INVALID TOKEN.PLEASE LOGIN" });
   }
 };
 module.exports = validateAdminToken;
