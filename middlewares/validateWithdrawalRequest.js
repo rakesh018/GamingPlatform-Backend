@@ -17,7 +17,7 @@ const validateWithdrawalRequest = [
     .isAlphanumeric()
     .withMessage("Account number must be alpha numeric")
     .isLength({ min: 9, max: 18 })
-    .withMessage("Account number must be more than 6 digits"),
+    .withMessage("Account number must be more than 9 digits"),
   body("ifscCode")
     .notEmpty()
     .withMessage("IFSC code is required")
