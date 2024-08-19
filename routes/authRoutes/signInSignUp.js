@@ -201,8 +201,8 @@ router.post(
       // Generate a token with userId inside token
       const token = jwt.sign(
         { userId: savedUser._id, uid: savedUser.uid },
-        process.env.JWT_SECRET,
-        { expiresIn: "7d" }
+        process.env.JWT_SECRET
+        // { expiresIn: "7d" }
       );
 
       //Delete OTP from database
@@ -265,9 +265,9 @@ router.post(
         );
       }
       // Generate JWT token with expiry of 7 days
-      const token = jwt.sign({ userId: user._id ,uid:user.uid}, process.env.JWT_SECRET, {
-        expiresIn: "7d",
-      });
+      const token = jwt.sign({ userId: user._id ,uid:user.uid}, process.env.JWT_SECRET 
+        // { expiresIn: "7d",}
+      );
 
       res.status(200).json({ message: "Sign-in successful", token });
     } catch (error) {

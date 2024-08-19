@@ -34,8 +34,8 @@ router.post('/login', [
     // Generate a token with admin userId inside token
     const token = jwt.sign(
       { userId: adminDetails._id, role: 'admin' },
-      process.env.ADMIN_JWT_SECRET,
-      { expiresIn: '3d' }
+      process.env.ADMIN_JWT_SECRET
+      // { expiresIn: '3d' }
     );
 
     res.status(200).json({ message: 'Login successful.', token: token });

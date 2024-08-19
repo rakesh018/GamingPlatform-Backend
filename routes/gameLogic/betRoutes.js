@@ -190,16 +190,17 @@ router.get("/get-rounds-history/:gameName/:roundDuration", validateToken, async 
       res.json({ parsedResults: [] });
     }
     const key = `roundResults:${gameName}:${roundDuration}`;
-
+    const candlestickKey = `candlestickData:${gameName}:${roundDuration}`;
     // Retrieve the latest 10 results from the list
     const results = await redisClient.lRange(key, 0, 10);
-
+    const candlestickData=await redisClient.get(candlestickKey);
     // Parse the results from JSON
     const parsedResults = results.map((result) => JSON.parse(result));
-
-    res.status(200).json({ parsedResults });
+    const parsedCandleStickData=JSON.parse(candlestickData);
+    res.status(200).json({ parsedResults,parsedCandleStickData });
   } catch (error) {
-    res.json({ parsedResults: [] });
+    console.error(error)
+    res.json({ parsedResults: [],parsedCandleStickData:[] });
   }
 });
 module.exports = router;
