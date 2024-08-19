@@ -98,105 +98,80 @@ const broadCastResults = async (
   // Define keys for Redis
   // Define keys for Redis
   const resultsKey = `roundResults:${gameName}:${roundDuration}`;
-  const candlestickKey = `candlestickData:${gameName}:${roundDuration}`;
+const candlestickKey = `candlestickData:${gameName}:${roundDuration}`;
 
-  try {
-    // Push the new round result to the Redis list and trim to keep only the last 10 entries
-    await redisClient.lPush(resultsKey, JSON.stringify(roundResult));
-    await redisClient.lTrim(resultsKey, 0, 10);
+try {
+  // Push the new round result to the Redis list and trim to keep only the last 10 entries
+  await redisClient.lPush(resultsKey, JSON.stringify(roundResult));
+  await redisClient.lTrim(resultsKey, 0, 10);
 
-    // Retrieve the latest 10 results from the list
-    const results = await redisClient.lRange(resultsKey, 0, 9);
-    const parsedResults = results.map((result) => JSON.parse(result));
+  // Retrieve the latest 10 results from the list
+  const results = await redisClient.lRange(resultsKey, 0, 9);
+  const parsedResults = results.map((result) => JSON.parse(result));
 
-    // Handle candlestick data
-    let candlestickData = await redisClient.get(candlestickKey);
-    candlestickData = candlestickData ? JSON.parse(candlestickData) : [];
-    console.log(candlestickData);
-    // Reverse the data to have the most recent entry at the start
-    candlestickData.reverse();
+  // Handle candlestick data
+  let candlestickData = await redisClient.get(candlestickKey);
+  candlestickData = candlestickData ? JSON.parse(candlestickData) : [];
+  console.log(candlestickData);
 
-    // Determine the change based on the round result
-    const randomChange = Math.random() * 10;
-    let lastOHLC =
-      candlestickData.length > 0
-        ? candlestickData[0] // Access the most recent data (as an array)
-        : {
-            x: new Date(),
-            y: [6000.81, 6000.5, 6000.04, 6000.33],
-          }; // Default OHLC values (array format)
+  // Reverse the data to have the most recent entry at the start
+  candlestickData.reverse();
 
-    // console.log("Last OHLC (array):", lastOHLC);
+  // Determine the change based on the round result
+  const randomChange = Math.random() * 10;
+  let lastOHLC =
+    candlestickData.length > 0
+      ? candlestickData[0] // Access the most recent data (as an array)
+      : {
+          x: new Date(),
+          y: [6000.81, 6000.5, 6000.04, 6000.33], // Default OHLC values (array format)
+        };
 
-    // Update OHLC values using array indexing
-    const newClose =
-      roundResult === 0
-        ? lastOHLC.y[3] - randomChange // lastOHLC[3] is close
-        : lastOHLC.y[3] + randomChange; // lastOHLC[3] is close
-    const newHigh = Math.max(lastOHLC.y[1], newClose); // lastOHLC[1] is high
-    const newLow = Math.min(lastOHLC.y[2], newClose); // lastOHLC[2] is low
+  // Update OHLC values using array indexing
+  const newClose =
+    roundResult === 0
+      ? lastOHLC.y[3] - randomChange // Bearish, closing lower
+      : lastOHLC.y[3] + randomChange; // Bullish, closing higher
 
-    // Check for invalid values
-    // if (
-    //   isNaN(lastOHLC.y[0]) || // open
-    //   isNaN(newHigh) ||
-    //   isNaN(newLow) ||
-    //   isNaN(newClose)
-    // ) {
-    //   console.error("Invalid OHLC values:", {
-    //     open: lastOHLC.y[0],
-    //     high: newHigh,
-    //     low: newLow,
-    //     close: newClose,
-    //   });
-    //   throw new Error("Invalid OHLC values");
-    // }
+  const newHigh = Math.max(lastOHLC.y[1], newClose); // Update the high if the new close is higher
+  const newLow = Math.min(lastOHLC.y[2], newClose);  // Update the low if the new close is lower
 
-    // // Log the new OHLC values
-    // console.log("New OHLC Values (array):", {
-    //   open: lastOHLC[0],
-    //   high: newHigh,
-    //   low: newLow,
-    //   close: newClose,
-    // });
+  // Push new candlestick data at the beginning of the array
+  candlestickData.unshift({
+    x: new Date(),
+    y: [lastOHLC.y[0], newHigh, newLow, newClose], // OHLC as array
+  });
 
-
-    // Push new candlestick data at the beginning of the array
-    candlestickData.unshift({
-      x: new Date(),
-      y: [lastOHLC.y[0], newHigh, newLow, newClose], // OHLC as array
-    });
-
-    // Limit the length of candlestick data
-    if (candlestickData.length > 10) {
-      candlestickData.pop(); // Remove the oldest data from the end
-    }
-
-    // Reverse back the data before caching
-    candlestickData.reverse();
-
-    // Cache the updated candlestick data
-    await redisClient.set(candlestickKey, JSON.stringify(candlestickData));
-
-    // Broadcast the results and candlestick data to all connected clients
-    userNamespace.emit(
-      "resultBroadcast",
-      gameName,
-      roundDuration,
-      parsedResults,
-      candlestickData
-    );
-    adminNamespace.emit(
-      "resultBroadcast",
-      gameName,
-      roundDuration,
-      roundResult,
-      candlestickData
-    );
-  } catch (error) {
-    console.error("Error broadcasting results:", error);
-    throw error;
+  // Limit the length of candlestick data
+  if (candlestickData.length > 10) {
+    candlestickData.pop(); // Remove the oldest data from the end
   }
-};
+
+  // Reverse back the data before caching
+  candlestickData.reverse();
+
+  // Cache the updated candlestick data
+  await redisClient.set(candlestickKey, JSON.stringify(candlestickData));
+
+  // Broadcast the results and candlestick data to all connected clients
+  userNamespace.emit(
+    "resultBroadcast",
+    gameName,
+    roundDuration,
+    parsedResults,
+    candlestickData
+  );
+  adminNamespace.emit(
+    "resultBroadcast",
+    gameName,
+    roundDuration,
+    roundResult,
+    candlestickData
+  );
+} catch (error) {
+  console.error("Error broadcasting results:", error);
+  throw error;
+}
+}
 
 module.exports = processTimers;
