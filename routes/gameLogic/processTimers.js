@@ -106,7 +106,7 @@ const broadCastResults = async (
     await redisClient.lTrim(resultsKey, 0, 10);
 
     // Retrieve the latest 10 results from the list
-    const results = await redisClient.lRange(resultsKey, 0, 10);
+    const results = await redisClient.lRange(resultsKey, 0, 9);
     const parsedResults = results.map((result) => JSON.parse(result));
 
     // Handle candlestick data

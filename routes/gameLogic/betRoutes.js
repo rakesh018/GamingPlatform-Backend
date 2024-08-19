@@ -192,7 +192,7 @@ router.get("/get-rounds-history/:gameName/:roundDuration", validateToken, async 
     const key = `roundResults:${gameName}:${roundDuration}`;
     const candlestickKey = `candlestickData:${gameName}:${roundDuration}`;
     // Retrieve the latest 10 results from the list
-    const results = await redisClient.lRange(key, 0, 10);
+    const results = await redisClient.lRange(key, 0, 9);
     const candlestickData=await redisClient.get(candlestickKey);
     // Parse the results from JSON
     const parsedResults = results.map((result) => JSON.parse(result));
