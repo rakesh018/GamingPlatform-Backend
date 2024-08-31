@@ -61,7 +61,8 @@ router.post("/mark-completed", validateRequest, async (req, res) => {
     );
 
     // Process referral
-    if (!newUser.firstDepositMade && newUser.referredBy) {
+    /*!newUser.firstDepositMade &&*/ 
+    if (newUser.referredBy) {
       //if user has not made a deposit and has been referred by someone
       const referrer = await User.findById(newUser.referredBy).session(session);
       referrer.withdrawableBalance +=
