@@ -29,17 +29,19 @@ const getParticularUserDetails = async (req, res) => {
     // Fetch total deposits and total withdrawals for the user
     const [totalDeposits, totalWithdrawals] = await Promise.all([
       ManualDeposit.aggregate([
-        { $match: { uid: getUser.uid } },
-        { $group: { _id: null, totalDeposits: { $sum: "$amount" } } }
+        { $match: { uid: getUser.uid, status: "completed" } },
+        { $group: { _id: null, totalDeposits: { $sum: "$amount" } } },
       ]),
       Withdrawal.aggregate([
-        { $match: { uid: getUser.uid ,status:'completed'} },
-        { $group: { _id: null, totalWithdrawals: { $sum: "$amount" } } }
+        { $match: { uid: getUser.uid, status: "completed" } },
+        { $group: { _id: null, totalWithdrawals: { $sum: "$amount" } } },
       ]),
     ]);
 
-    const totalDepositAmount = totalDeposits.length > 0 ? totalDeposits[0].totalDeposits : 0;
-    const totalWithdrawalAmount = totalWithdrawals.length > 0 ? totalWithdrawals[0].totalWithdrawals : 0;
+    const totalDepositAmount =
+      totalDeposits.length > 0 ? totalDeposits[0].totalDeposits : 0;
+    const totalWithdrawalAmount =
+      totalWithdrawals.length > 0 ? totalWithdrawals[0].totalWithdrawals : 0;
 
     // Return user details along with total deposits and withdrawals
     res.status(200).json({
