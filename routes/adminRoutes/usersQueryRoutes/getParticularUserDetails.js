@@ -2,6 +2,7 @@ const User = require("../../../models/userModels");
 const ManualDeposit = require("../../../models/manualDeposit");
 const Withdrawal = require("../../../models/withdrawal");
 const mongoose = require("../../../models/db");
+const Notification=require('../../../models/notificationModel');
 
 const getParticularUserDetails = async (req, res) => {
   try {
@@ -19,12 +20,13 @@ const getParticularUserDetails = async (req, res) => {
     const getUser = await User.findOne({
       $or: [...(isValidObjectId ? [{ _id: userId }] : []), { uid: userId }],
     });
-
     if (!getUser) {
       throw new Error(
         JSON.stringify({ status: 400, message: `INVALID USER ID` })
       );
     }
+    //referral count
+    const referralCount=await Notification.countDocuments({userId,notificationType:"referral"});
 
     // Fetch total deposits and total withdrawals for the user
     const [totalDeposits, totalWithdrawals] = await Promise.all([
@@ -47,6 +49,7 @@ const getParticularUserDetails = async (req, res) => {
     res.status(200).json({
       message: `User details fetched successfully.`,
       user: getUser,
+      referralCount,
       totalDeposits: totalDepositAmount,
       totalWithdrawals: totalWithdrawalAmount,
     });
