@@ -17,6 +17,7 @@ const getProfile = async (req, res) => {
       phone: getUserFromDB.phone,
       uid: getUserFromDB.uid,
       balance: totalBalance,
+      withdrawableBalance:getUserFromDB.withdrawableBalance,
       referralCode: getUserFromDB.referralCode,
     });
   } catch (err) {
