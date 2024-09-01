@@ -24,7 +24,10 @@ const saveManualDepositKey = [
     try {
       const { key, amount,utr} = req.body;
       const userId = req.userId;
-
+      const ifUtrExists=await ManualDeposit.exists({utr});
+      if(ifUtrExists){
+        throw new Error (JSON.stringify({status:400,message:'UTR already exists'}));
+      }
       const newManualDeposit = new ManualDeposit({
         userId: userId,
         s3Key: key,
