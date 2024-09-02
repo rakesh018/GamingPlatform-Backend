@@ -5,7 +5,7 @@ const {
 } = require("./analyticsService");
 
 const scheduleAnalyticsUpdates = () => {
-  cron.schedule("30 1 * * *", async () => {
+  cron.schedule("45 1 * * *", async () => {
     await updateAnnualAnalytics();
     console.log("Annual analytics updated");
   });
