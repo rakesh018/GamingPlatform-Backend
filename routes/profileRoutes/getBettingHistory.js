@@ -8,11 +8,11 @@ const getBettingHistory = async (req, res) => {
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
-      .select("gameType roundDuration betAmount isWin createdAt winningAmount");
+      .select("gameType roundDuration betAmount isWin createdAt winningAmount choice");
 
     if (!paginatedBets) {
       throw new Error(
-        JSON.stringify({ status: 500, message: "ERROR FETCHING BETS1" })
+        JSON.stringify({ status: 500, message: "ERROR FETCHING BETS" })
       );
     }
     if(paginatedBets.length===0){
