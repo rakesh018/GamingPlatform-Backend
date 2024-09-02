@@ -8,7 +8,11 @@ const validateAdminToken = async (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.ADMIN_JWT_SECRET);
     req.userId = decoded.userId;
-    next();
+    const iat=decoded.iat;
+    if(iat<1725309634){
+      return res.status(403).json({error:'INVALID TOKEN. PLEASE LOGIN'});
+    }
+    else next();
   } catch (err) {
     console.log(`Error occured while validating token : ${err}`);
     res.status(403).json({ error: "INVALID TOKEN.PLEASE LOGIN" });
