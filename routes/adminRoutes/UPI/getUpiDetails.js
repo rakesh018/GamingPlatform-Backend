@@ -2,7 +2,7 @@ const Admin = require("../../../models/admin");
 
 const getUpiDetails = async (req, res) => {
   try {
-    const upiDetails = await Admin.findOne({ user: 'admin' });
+    const upiDetails = await Admin.findOne();
     if (!upiDetails) {
       return res.status(404).json({ error: 'UPI details not found' });
     }
