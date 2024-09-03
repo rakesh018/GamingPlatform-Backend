@@ -26,7 +26,8 @@ const getParticularUserDetails = async (req, res) => {
       );
     }
     //referral count
-    const referralCount=await Notification.countDocuments({userId,notificationType:"referral"});
+    const toSearchUserId=getUser._id;
+    const referralCount=await User.countDocuments({referredBy:toSearchUserId});
 
     // Fetch total deposits and total withdrawals for the user
     const [totalDeposits, totalWithdrawals] = await Promise.all([

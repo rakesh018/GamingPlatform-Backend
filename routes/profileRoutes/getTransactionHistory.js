@@ -16,21 +16,21 @@ const getTransactionHistory = async (req, res) => {
     const autoDeposits = await AutoDeposit.aggregate([
       { $match: { userId: new mongoose.Types.ObjectId(userId), /*status: "completed"*/ } },
       { $sort: { createdAt: -1 } },
-      { $project: { type: {$literal:"autoDeposit"}, amount: 1, createdAt: 1 ,status:1} },
+      { $project: { type: {$literal:"Deposit"}, amount: 1, createdAt: 1 ,status:1} },
     ]).exec();
 
     // Fetch Manual Deposits
     const manualDeposits = await ManualDeposit.aggregate([
       { $match: { userId: new mongoose.Types.ObjectId(userId), /*status: "completed"*/ } },
       { $sort: { createdAt: -1 } },
-      { $project: { type: { $literal: "manualDeposit" }, amount: 1, createdAt: 1 ,status:1} },
+      { $project: { type: { $literal: "Deposit" }, amount: 1, createdAt: 1 ,status:1} },
     ]).exec();
 
     // Fetch Withdrawals
     const withdrawals = await Withdrawal.aggregate([
       { $match: { userId: new mongoose.Types.ObjectId(userId), /*status: "completed"*/ } },
       { $sort: { createdAt: -1 } },
-      { $project: { type: { $literal: "withdrawal" }, amount: 1, createdAt: 1 ,status:1} },
+      { $project: { type: { $literal: "Withdrawal" }, amount: 1, createdAt: 1 ,status:1} },
     ]).exec();
 
     // Combine results

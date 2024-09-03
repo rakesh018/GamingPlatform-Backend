@@ -1,10 +1,10 @@
 const Notification = require("../../models/notificationModel");
+const User=require('../../models/userModels');
 const getReferralCount = async (req, res) => {
   try {
     const userId = req.userId;
-    const totalReferrals = await Notification.countDocuments({
-      userId: userId,
-      notificationType: "referral",
+    const totalReferrals = await User.countDocuments({
+      referredBy:userId
     });
     res.status(200).json({referralCount:totalReferrals});
   } catch (error) {

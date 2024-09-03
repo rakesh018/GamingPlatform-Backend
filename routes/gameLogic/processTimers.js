@@ -112,7 +112,6 @@ const broadCastResults = async (
     // Handle candlestick data
     let candlestickData = await redisClient.get(candlestickKey);
     candlestickData = candlestickData ? JSON.parse(candlestickData) : [];
-    console.log(candlestickData);
 
     // Reverse the data to have the most recent entry at the start
     candlestickData.reverse();
