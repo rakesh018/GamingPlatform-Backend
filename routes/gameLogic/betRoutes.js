@@ -44,10 +44,10 @@ router.post(
 
     let { gameName, roundDuration, betAmount, betChoice } = req.body;
     if(betAmount<10){
-      return res.status(400).json({error:'Minimum bet amount is 10'});
+      return res.status(400).json('Minimum bet amount is 10');
     }
     if(betAmount>300000){
-      return res.status(400).json({error:'Maximum bet amount is 300000'});
+      return res.status(400).json('Maximum bet amount is 300000');
     }
     const userId = req.userId; // from token validation
     const mappedChoice = mapChoice(gameName, betChoice);
