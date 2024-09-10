@@ -26,8 +26,8 @@ router.post(
     body("betAmount")
       .notEmpty()
       .withMessage("Bet amount is required")
-      .isFloat({ gt: 9 })
-      .withMessage("Minimum bet amount is 10"),
+      .isFloat()
+      .withMessage("Invalid amount"),
     body("betChoice")
       .notEmpty()
       .withMessage("Bet choice is required")
@@ -39,10 +39,16 @@ router.post(
     //error management
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      throw new Error(JSON.stringify({status:400,message:errors.array()[0].msg}))
+      return res.status(400).json({error:errors.array()[0].msg});
     }
 
     let { gameName, roundDuration, betAmount, betChoice } = req.body;
+    if(betAmount<10){
+      return res.status(400).json({error:'Minimum bet amount is 10'});
+    }
+    if(betAmount>300000){
+      return res.status(400).json({error:'Maximum bet amount is 300000'});
+    }
     const userId = req.userId; // from token validation
     const mappedChoice = mapChoice(gameName, betChoice);
     betAmount = parseFloat(betAmount);
@@ -50,10 +56,7 @@ router.post(
     const round = gameTimers[gameName].find(
       (r) => r.duration === roundDuration
     );
-    if (req.isDemo === false) {
-      //not considering demo user bets into regular flow
-      round[`betAmount${mappedChoice}`] += betAmount;
-    }
+
 
     // Start a session and transaction
     const session = await User.startSession();
@@ -89,7 +92,10 @@ router.post(
 
       // Save the user with the updated balances within the transaction
       await user.save({ session });
-
+      if (req.isDemo === false) {
+        //not considering demo user bets into regular flow
+        round[`betAmount${mappedChoice}`] += betAmount;
+      }
       // Add the bet to the respective queue
       await queue.add("bet", { betAmount, mappedChoice, userId });
 
