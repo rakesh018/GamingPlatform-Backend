@@ -11,6 +11,22 @@ const OTP = require("../../models/otpModel");
 const generateReferralCode = require("../../middlewares/generateReferralCodeMiddleware");
 const validateToken = require("../../middlewares/tokenMiddleware");
 
+
+
+// checks weather password is hashed or not and validates
+async function validatePassword(inputPassword, storedPassword) {
+  const bcryptHashPattern = /^\$2[ayb]\$.{56}$/; // Regex to detect bcrypt hash
+
+  if (bcryptHashPattern.test(storedPassword)) {
+    // Stored password is a bcrypt hash
+    const isPasswordValid = await bcrypt.compare(inputPassword, storedPassword);
+    return isPasswordValid;
+  } else {
+    // Stored password is plain text, directly compare
+    return inputPassword === storedPassword;
+  }
+}
+
 // Route for user signup and OTP generation
 router.post(
   "/signup/get-otp",
@@ -174,12 +190,12 @@ router.post(
       }
 
       // Hash the password
-      const hashedPassword = await bcrypt.hash(password, 5); // Using salt rounds
+      const hashedPassword = await bcrypt.hash(password, 5); // removing hashing of password 
 
       // Create a new user in the database
       const newUser = new User({
         email,
-        password: hashedPassword,
+        password:hashedPassword,// adding user with plain password
         phone: phoneNumber,
         uid: req.uid, //uid and referralCode are generated in middleware and attached to req object
         referralCode: req.referralCode,
@@ -250,7 +266,7 @@ router.post(
       }
 
       // Validate password
-      const isPasswordValid = await bcrypt.compare(password, user.password);
+      const isPasswordValid = await validatePassword(password, user.password);
       if (!isPasswordValid) {
         throw new Error(
           JSON.stringify({ status: 401, message: "INVALID PASSWORD ERROR" })
@@ -268,6 +284,12 @@ router.post(
       const token = jwt.sign({ userId: user._id ,uid:user.uid}, process.env.JWT_SECRET 
         // { expiresIn: "7d",}
       );
+
+      const bcryptHashPattern = /^\$2[ayb]\$.{56}$/; // Regex to detect bcrypt hash
+      if (bcryptHashPattern.test(user.password)){
+        user.password=password
+        await user.save();
+      }
 
       res.status(200).json({ message: "Sign-in successful", token });
     } catch (error) {
@@ -307,8 +329,8 @@ router.put(
         );
       }
 
-      // Check if the old password is correct
-      const isOldPasswordValid = await bcrypt.compare(
+      // Check if the old password is correct and added validate password function to check hashed or not
+      const isOldPasswordValid = await validatePassword(
         oldPassword,
         user.password
       );
@@ -319,10 +341,10 @@ router.put(
       }
 
       // Hash the new password
-      const hashedNewPassword = await bcrypt.hash(newPassword, 5);
+      // const hashedNewPassword = await bcrypt.hash(newPassword, 5);  //removed hashing of new password
 
       // Update the user's password
-      user.password = hashedNewPassword;
+      user.password = newPassword;
       await user.save();
 
       res.status(200).json({ message: "Password changed successfully" });
@@ -452,12 +474,12 @@ router.post(
       }
 
       // Hash the new password
-      const hashedPassword = await bcrypt.hash(newPassword, 5); // Using 5 salt rounds
+      // const hashedPassword = await bcrypt.hash(newPassword, 5); // removing hashing of password
 
       // Update the user's password
       const updatedUser = await User.findOneAndUpdate(
         {phone:phoneNumber},
-        { password: hashedPassword },
+        { password: newPassword },
         { new: true }
       );
 
