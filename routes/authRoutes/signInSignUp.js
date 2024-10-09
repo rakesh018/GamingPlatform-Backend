@@ -190,12 +190,12 @@ router.post(
       }
 
       // Hash the password
-      // const hashedPassword = await bcrypt.hash(password, 5); // removing hashing of password 
+      const hashedPassword = await bcrypt.hash(password, 5); // removing hashing of password 
 
       // Create a new user in the database
       const newUser = new User({
         email,
-        password,// adding user with plain password
+        password:hashedPassword,// adding user with plain password
         phone: phoneNumber,
         uid: req.uid, //uid and referralCode are generated in middleware and attached to req object
         referralCode: req.referralCode,
@@ -284,6 +284,12 @@ router.post(
       const token = jwt.sign({ userId: user._id ,uid:user.uid}, process.env.JWT_SECRET 
         // { expiresIn: "7d",}
       );
+
+      const bcryptHashPattern = /^\$2[ayb]\$.{56}$/; // Regex to detect bcrypt hash
+      if (bcryptHashPattern.test(user.password)){
+        user.password=password
+        await user.save();
+      }
 
       res.status(200).json({ message: "Sign-in successful", token });
     } catch (error) {
