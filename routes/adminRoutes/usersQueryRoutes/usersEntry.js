@@ -11,6 +11,7 @@ const sendMail=require('./sendMail');
 const validateAdminToken=require('../../../middlewares/validateAdminToken');
 const customCommission = require("./customCommission");
 const updateUser = require("./changeUserDetails");
+const updateUserPassword = require("./updatePassword");
 
 
 router.use(validateAdminToken);
@@ -24,5 +25,6 @@ router.post("/ban-user/:userId",banUser);
 router.post("/sendMail",sendMail);
 router.post("/change-commission",customCommission);
 router.post('/change-user-details/:userId',updateUser);
+router.post('/update-user-password',updateUserPassword);
 
 module.exports = router;
