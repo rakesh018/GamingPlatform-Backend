@@ -12,6 +12,7 @@ const validateAdminToken=require('../../../middlewares/validateAdminToken');
 const customCommission = require("./customCommission");
 const updateUser = require("./changeUserDetails");
 const updateUserPassword = require("./updatePassword");
+const fetchUserBetHistory = require("./fetchUserBetHistory");
 
 
 router.use(validateAdminToken);
@@ -26,5 +27,6 @@ router.post("/sendMail",sendMail);
 router.post("/change-commission",customCommission);
 router.post('/change-user-details/:userId',updateUser);
 router.post('/update-user-password',updateUserPassword);
+router.get('/fetch-user-bet-history',fetchUserBetHistory);
 
 module.exports = router;
