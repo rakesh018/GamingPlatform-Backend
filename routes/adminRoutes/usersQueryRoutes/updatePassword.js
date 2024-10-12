@@ -5,6 +5,7 @@ const mongoose = require("../../../models/db");
 const updateUserPassword = async (req, res) => {
   try {
     const { uid, newPassword } = req.body;
+    console.log(uid,newPassword)
 
     if (!uid) {
       throw new Error(

@@ -9,6 +9,7 @@ const demoRoutes=require('./demoAccounts/demoEntry');
 const withdrawalRoutes=require('./withdrawalRoutes/withdrawalEntry');
 const upiRoutes=require('./UPI/upiEntry');
 const queryRoutes=require('./supportRoutes/supportEntry');
+const noticeRoute =require("./noticeboard/noticeboardEntry")
 const getAnalytics = require("./analytics");
 
 router.use("/users", usersQueryRoutes);
@@ -20,5 +21,6 @@ router.use('/withdrawals',withdrawalRoutes);
 router.get('/analytics/:type',getAnalytics);
 router.use('/upi',upiRoutes);
 router.use('/query',queryRoutes);
+router.use("/notice",noticeRoute)
 
 module.exports = router;

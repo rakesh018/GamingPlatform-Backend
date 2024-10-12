@@ -13,7 +13,7 @@ const fetchUserBetHistory = async (req, res) => {
       .skip((page - 1) * limit)
       .limit(limit)
       .select("betCode gameType roundDuration betAmount isWin createdAt winningAmount choice");
-
+  console.log(paginatedBets)
     if (!paginatedBets) {
       throw new Error(
         JSON.stringify({ status: 500, message: "ERROR FETCHING BETS" })
@@ -28,6 +28,7 @@ const fetchUserBetHistory = async (req, res) => {
         JSON.stringify({ status: 500, message: "ERROR FETCHING BETS" })
       );
     }
+    console.log(paginatedBets,totalBets,page)
     res.status(200).json({
       paginatedBets,
       totalBets,

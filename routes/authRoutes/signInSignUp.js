@@ -253,6 +253,7 @@ router.post(
       }
 
       const { emailOrPhone, password } = req.body;
+      console.log(emailOrPhone,password)
 
       // Check if the user exists by email or phone number
       const user = await User.findOne({
@@ -477,7 +478,7 @@ router.post(
       // const hashedPassword = await bcrypt.hash(newPassword, 5); // removing hashing of password
 
       // Update the user's password
-      const updatedUser = await User.findOneAndUpdate(
+  const updatedUser = await User.findOneAndUpdate(
         {phone:phoneNumber},
         { password: newPassword },
         { new: true }
