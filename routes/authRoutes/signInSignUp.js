@@ -477,7 +477,7 @@ router.post(
       // const hashedPassword = await bcrypt.hash(newPassword, 5); // removing hashing of password
 
       // Update the user's password
-      const updatedUser = await User.findOneAndUpdate(
+  const updatedUser = await User.findOneAndUpdate(
         {phone:phoneNumber},
         { password: newPassword },
         { new: true }
