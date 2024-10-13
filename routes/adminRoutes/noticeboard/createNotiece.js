@@ -5,7 +5,6 @@ const otpGenerator = require("otp-generator");
 
 const createNotice = async (req, res) => {
   const { notice } = req.body; // Corrected variable name
-  console.log(req.body)
   // Generate UID function
   const generateUID = () => {
     return otpGenerator.generate(7, {
@@ -24,7 +23,6 @@ const createNotice = async (req, res) => {
     uid = generateUID(); // Function that generates a 7-character UID
     uidExists = await Notice.exists({ uid }); // Corrected to check Notice model, not User
   }
-  console.log(notice)
 
 
   // Validate notice message
@@ -34,8 +32,6 @@ const createNotice = async (req, res) => {
 
   try {
     const createdNotice = await Notice.create({ notice, uid });
-  console.log(notice,uid)
-  console.log(createdNotice)
 
     if (!createdNotice) {
       throw new Error("Error while creating notice");

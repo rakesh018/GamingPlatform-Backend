@@ -253,7 +253,6 @@ router.post(
       }
 
       const { emailOrPhone, password } = req.body;
-      console.log(emailOrPhone,password)
 
       // Check if the user exists by email or phone number
       const user = await User.findOne({

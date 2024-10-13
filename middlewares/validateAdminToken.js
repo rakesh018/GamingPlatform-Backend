@@ -1,7 +1,6 @@
 const jwt = require("jsonwebtoken");
 const   validateAdminToken = async (req, res, next) => {
   const token = req?.header("Authorization")?.split(" ")[1]; //'Bearer token
-  console.log(token)
   if (!token) {
     return res.status(403).json({ error: "ACCESS DENIED, NO TOKEN PROVIDED" });
   }

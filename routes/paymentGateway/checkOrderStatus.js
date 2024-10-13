@@ -18,9 +18,7 @@ const checkStatus = async () => {
 
     const data = response.data;
 
-    console.log(data);
     if (data.result.status === "SUCCESS") {
-      console.log(`payment done`);
       return data;
     } else {
       throw new Error(data.message || "Unknown error");

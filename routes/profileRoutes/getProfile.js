@@ -24,7 +24,6 @@ const getProfile = async (req, res) => {
       redDot
     });
   } catch (err) {
-    console.log(`Error getting Profile Details : ${err}`);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
