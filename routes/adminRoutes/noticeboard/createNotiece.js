@@ -16,12 +16,12 @@ const createNotice = async (req, res) => {
   };
 
   // Generate unique UID for notice
-  let uid;
+  let noticeid;
   let uidExists = true;
   while (uidExists) {
     // Ensure only unique UIDs exist in the database
-    uid = generateUID(); // Function that generates a 7-character UID
-    uidExists = await Notice.exists({ uid }); // Corrected to check Notice model, not User
+    noticeid = generateUID(); // Function that generates a 7-character UID
+    uidExists = await Notice.exists({ noticeid }); // Corrected to check Notice model, not User
   }
 
 
@@ -31,7 +31,7 @@ const createNotice = async (req, res) => {
   }
 
   try {
-    const createdNotice = await Notice.create({ notice, uid });
+    const createdNotice = await Notice.create({ notice, noticeid });
 
     if (!createdNotice) {
       throw new Error("Error while creating notice");

@@ -15,6 +15,6 @@ router.get("/", getAllNotices);
 // post notieces
 router.post("/createnotice",createNotice);
 // delete notiece
-router.delete('/:uid', deleteNotice);
+router.delete('/:noticeid', deleteNotice);
 
 module.exports = router;

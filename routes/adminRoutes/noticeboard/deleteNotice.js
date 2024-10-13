@@ -2,11 +2,11 @@ const User = require("../../../models/userModels");
 const Notice = require("../../../models/notices")
 const deleteNotice = async (req, res) => {
   try {
-    const uid = parseInt(req.params.uid)
+    const noticeid = parseInt(req.params.noticeid)
 
    
     // Deleting notice directly
-    const result = await Notice.deleteOne({ uid });
+    const result = await Notice.deleteOne({ noticeid });
 
     // Check if the notice was deleted
     if (result.deletedCount === 0) {

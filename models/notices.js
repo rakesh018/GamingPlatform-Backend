@@ -3,7 +3,7 @@ const mongoose = require("./db");
 const noticeSchema = new mongoose.Schema(
   {
     notice: { type: String, required: true, unique: true },
-    uid:{type:String,unique:true,required:true}
+    noticeid:{type:String,unique:true,required:true}
   }
 );
 
