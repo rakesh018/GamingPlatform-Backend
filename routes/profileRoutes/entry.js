@@ -10,7 +10,8 @@ const getAllNotifications = require('./getAllNotifications');
 const markNotificationSeen = require('./markNotificationSeen');
 const makeQuery = require('./makeQuery');
 const getReferralCount = require('./referralCount');
-const getAllNotices=require("./getAllnotices")
+const getAllNotices=require("./getAllnotices");
+const fetchOnlineCount = require('./fetchOnlineCount');
 
 //Protected routes need jwt to get access so use a middleware
 router.get('/getProfile', validateToken,getProfile );
@@ -22,5 +23,6 @@ router.post('/mark-notification-seen',validateToken,markNotificationSeen);
 router.post('/make-query',validateToken,makeQuery);
 router.get('/referral-count',validateToken,getReferralCount);
 router.get('/get-all-notices',validateToken,getAllNotices);
+router.get('/get-online-user-count',validateToken,fetchOnlineCount);
 
 module.exports = router;

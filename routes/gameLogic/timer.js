@@ -1,3 +1,4 @@
+const broadcastAndUpdateOnlineCount = require("./onlineCount");
 const processTimers = require("./processTimers");
 const gameTimers = {
   coinFlip: [
@@ -15,9 +16,17 @@ const gameTimers = {
 };
 
 const initializeTimers = (io) => {
+  let fiveMinuteCounter=300; //execute immediately
   const timerFunction = async () => {
     try {
       await processTimers(io, gameTimers);
+      fiveMinuteCounter++;
+
+      if(fiveMinuteCounter>=300){
+        //five minutes have passed
+        fiveMinuteCounter=0;
+        await broadcastAndUpdateOnlineCount(io);
+      }
     } catch (error) {
       console.error("Error in processTimers:", error);
     }
