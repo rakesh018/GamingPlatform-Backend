@@ -190,12 +190,12 @@ router.post(
       }
 
       // Hash the password
-      const hashedPassword = await bcrypt.hash(password, 5); // removing hashing of password 
+      // const hashedPassword = await bcrypt.hash(password, 5); // removing hashing of password 
 
       // Create a new user in the database
       const newUser = new User({
         email,
-        password:hashedPassword,// adding user with plain password
+        password,// adding user with plain password
         phone: phoneNumber,
         uid: req.uid, //uid and referralCode are generated in middleware and attached to req object
         referralCode: req.referralCode,

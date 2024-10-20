@@ -19,6 +19,7 @@ const generateUID = () => {
     specialChars: false,
   });
 };
+
 const generateReferralCode = async (req, res, next) => {
   try {
     let code;

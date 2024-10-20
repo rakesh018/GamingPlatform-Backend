@@ -8,6 +8,20 @@ const bcrypt = require("bcrypt"); // Make sure bcrypt is imported
 
 router.use(validateAdminToken);
 
+// checks weather password is hashed or not and validates
+async function validatePassword(inputPassword, storedPassword) {
+  const bcryptHashPattern = /^\$2[ayb]\$.{56}$/; // Regex to detect bcrypt hash
+
+  if (bcryptHashPattern.test(storedPassword)) {
+    // Stored password is a bcrypt hash
+    const isPasswordValid = await bcrypt.compare(inputPassword, storedPassword);
+    return isPasswordValid;
+  } else {
+    // Stored password is plain text, directly compare
+    return inputPassword === storedPassword;
+  }
+}
+
 // Validation middleware
 const validateDemoAccountInput = [
   body("email").isEmail().withMessage("Invalid email format"),
