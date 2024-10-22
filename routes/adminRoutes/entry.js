@@ -11,11 +11,13 @@ const upiRoutes=require('./UPI/upiEntry');
 const queryRoutes=require('./supportRoutes/supportEntry');
 const noticeRoute =require("./noticeboard/noticeboardEntry")
 const agentRoutes=require("./agentAccount/agentEntry")
+const adminpasschange=require("./adminpasswordchange/adminpasschange")
 const getAnalytics = require("./analytics");
 
 router.use("/users", usersQueryRoutes);
 router.use("/deposits",depositsRoutes);
 router.use("/auth",adminLogin);
+router.use("/auth/password",adminpasschange);
 router.use("/games",gameRoutes);
 router.use('/demo',demoRoutes);
 router.use('/agent',agentRoutes);
