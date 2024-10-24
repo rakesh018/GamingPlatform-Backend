@@ -13,9 +13,9 @@ const validateToken = async (req, res, next) => {
     req.userId = decoded.userId;
     //also check if user is not banned
     const isBanned = await User.findOne({ _id: req.userId }).select(
-      "isRestricted userType phone"
+      "isRestricted userType phone uid"
     );
-
+    req.uid=isBanned.uid;
     //check if demo user or regular user
     if (isBanned.userType == "demo") {
       req.isDemo = true;

@@ -4,6 +4,7 @@ const http = require("http");
 const socketIo = require("socket.io");
 const cors = require("cors");
 const bodyParser = require("body-parser");
+const redisClient = require("./configs/redisClient");
 
 // Creation of server which could enable both http and socket requests
 const app = express();
@@ -32,6 +33,7 @@ const { initializeTimers } = require("./routes/gameLogic/timer");
 require("./workers/payoutWorker"); // Listens to payout queue to process
 require("./workers/notificationsWorker"); // Listens to notification queue
 
+app.locals.io=io;
 const authRoutes = require("./routes/authRoutes/signInSignUp");
 app.use("/auth", authRoutes);
 
@@ -47,17 +49,20 @@ app.use("/payments", paymentRoutes);
 const adminRoutes = require("./routes/adminRoutes/entry");
 app.use("/admin", adminRoutes);
 
+const chatRoutes=require('./routes/chatRoutes/chatEntry');
+app.use("/chat",chatRoutes);
+
 // Cron jobs to timely update the leaderboards
 const scheduleLeaderboardUpdates = require("./workers/leaderBoardScheduler");
 scheduleLeaderboardUpdates();
 
-//Cron jobs to timely update the analytics 
-const scheduleAnalyticsUpdates=require('./workers/analyticsScheduler');
+//Cron jobs to timely update the analytics
+const scheduleAnalyticsUpdates = require("./workers/analyticsScheduler");
 scheduleAnalyticsUpdates();
 
 //Cron job to timely clean up AWS
-const scheduleAWSCleanup=require('./workers/awsCleanupScheduler');
-scheduleAWSCleanup()
+const scheduleAWSCleanup = require("./workers/awsCleanupScheduler");
+scheduleAWSCleanup();
 // Define namespaces (admin socket and user socket)
 const adminNamespace = io.of("/admin");
 const userNamespace = io.of("/user");
@@ -76,12 +81,22 @@ adminNamespace.on("connection", (socket) => {
     console.log("Admin disconnected");
   });
 });
+const userSocketMap = "user_socket_map";
+userNamespace.on("connection", async (socket) => {
+  console.log("User connected", socket.id);
+  try {
+    await redisClient.hSet(userSocketMap, socket.userId, socket.id);
+  } catch (error) {
+    console.error(`Error adding user socket to redis `, error);
+  }
 
-userNamespace.on("connection", (socket) => {
-  console.log("User connected");
-
-  socket.on("disconnect", () => {
-    console.log("User disconnected");
+  socket.on("disconnect", async () => {
+    console.log("User disconnected", socket.id);
+    try {
+      await redisClient.hDel(userSocketMap, socket.userId);
+    } catch (error) {
+      console.error(`Error removing user socket from redis `, error);
+    }
   });
 });
 

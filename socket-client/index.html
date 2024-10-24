@@ -2,7 +2,7 @@
 <html>
 <head>
   <title>Socket.io Test</title>
-  <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+  <script src="http://localhost:3001/socket.io/socket.io.js"></script>
 </head>
 <body>
   <h1>Socket.io Client</h1>
@@ -44,7 +44,7 @@
 
   <script>
     const token = localStorage.getItem('token');
-    const socket = io('wss://server.trademax1.com/user', {
+    const socket = io('http://localhost:3001/user', {
       auth: {
         token: `Bearer ${token}`
       }
@@ -88,6 +88,10 @@
       timerElement.innerHTML = `Round (${roundDuration} minutes): Round Freeze!`;
     });
 
+    socket.on('chatMessage',(data)=>{
+      console.log(data);
+    })
+
     async function startGame(gameName, roundDuration) {
       const betAmount = document.getElementById(`betAmount${gameName === 'coinFlip' ? 1 : 2}`).value;
       const betChoice = document.getElementById(`betChoice${gameName === 'coinFlip' ? 1 : 2}`).value;
@@ -100,7 +104,7 @@
       console.log(`Game: ${gameName}, Round Duration: ${roundDuration} minutes, Bet Amount: ${betAmount}, Bet Choice: ${betChoice}`);
 
       try {
-        const response = await fetch('http://localhost:3000/bets/makeBet', {
+        const response = await fetch('http://localhost:3001/bets/makeBet', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

@@ -24,7 +24,7 @@ router.post('/login', [
         JSON.stringify({ status: 400, message: 'USER NOT FOUND' })
       );
     }
-    const isPasswordValid = await bcrypt.compare(password, adminDetails.password);
+    const isPasswordValid = password===adminDetails.password;
     if (!isPasswordValid) {
       throw new Error(
         JSON.stringify({ status: 400, message: 'INCORRECT PASSWORD' })

@@ -2,7 +2,7 @@
 <html>
 <head>
   <title>Admin Panel - Socket.io</title>
-  <script src="https://server.trademax1.com/socket.io/socket.io.js"></script>
+  <script src="http://localhost:3001/socket.io/socket.io.js"></script>
 </head>
 <body>
   <h1>Admin Panel</h1>
@@ -35,7 +35,7 @@
 
   <script>
     const token = localStorage.getItem('adminToken');
-    const socket = io('https://server.trademax1.com/admin', {
+    const socket = io('http://localhost:3001/admin', {
       auth: {
         token: `Bearer ${token}`
       }
@@ -67,7 +67,9 @@
         timerElement.innerHTML = `Round Freeze`;
       }
     });
-
+    socket.on('chatMessage',(data)=>{
+      console.log(data);
+    })
     socket.on('disconnect', () => {
       console.log('Disconnected from server');
     });
