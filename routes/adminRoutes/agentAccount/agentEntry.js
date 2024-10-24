@@ -6,7 +6,6 @@ const User = require("../../../models/userModels");
 const bcrypt = require("bcrypt"); // Make sure bcrypt is imported
 const otpGenerator = require("otp-generator");
 
-
 router.use(validateAdminToken);
 
 // function to generate the uid
@@ -29,7 +28,7 @@ const validateDemoAccountInput = [
   body("referal")
     .matches(/^[A-Z0-9]{7}$/)
     .withMessage(
-      "Referral code must be exactly 7 characters long, containing only uppercase alphabets and digits"
+      "Referral should be digits and upper alphabets with 7 characters"
     ),
 ];
 
@@ -50,8 +49,7 @@ router.post(
     try {
       // Expects {email, password, number,referal}
       const { email, password, number, referal } = req.body;
-
-      const isreferalexist=await User.exists({ referralCode:referal });
+      const isreferalexist = await User.exists({ referralCode: referal });
       if (isreferalexist) {
         throw new Error(
           JSON.stringify({ status: 400, message: "Referal already exists" })
@@ -94,10 +92,10 @@ router.post(
       try {
         parsedError = JSON.parse(error.message);
       } catch (e) {
-        parsedError = { status: 500, message:e.message};
+        parsedError = { status: 500, message: e.message };
       }
       console.error("Error occurred during creating Agent account : ", error);
-      res.status(parsedError.status).json({ error: parsedError.message });
+      res.status(parsedError.status).json({ errors: parsedError.message });
     }
   }
 );
