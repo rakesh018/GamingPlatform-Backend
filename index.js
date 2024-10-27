@@ -52,6 +52,9 @@ app.use("/admin", adminRoutes);
 const chatRoutes=require('./routes/chatRoutes/chatEntry');
 app.use("/chat",chatRoutes);
 
+const agentRoutes=require('./routes/agentRoutes/agentEntry');
+app.use("/agent",agentRoutes);
+
 // Cron jobs to timely update the leaderboards
 const scheduleLeaderboardUpdates = require("./workers/leaderBoardScheduler");
 scheduleLeaderboardUpdates();

@@ -137,11 +137,12 @@
 
       try {
         // Request a presigned URL from the backend
-        const response = await fetch('http://localhost:3000/payments/manual-payment/generate-psu', {
+        const agentToken=localStorage.getItem('agentToken')
+        const response = await fetch('http://localhost:3001/agent/get-psu-for-agent', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${agentToken}`
           },
           body: JSON.stringify({ fileName: file.name, fileType: file.type })
         });
@@ -174,13 +175,13 @@
         alert('File uploaded successfully');
         
         // Optionally, you can send the file key to your backend to store it in the database
-        const saveResponse = await fetch('http://localhost:3000/payments/manual-payment/save-key', {
+        const saveResponse = await fetch('http://localhost:3001/agent/save-key-for-agent', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${agentToken}`
           },
-          body: JSON.stringify({ key ,amount:100,utr:12345})
+          body: JSON.stringify({ key ,amount:120,utr:56789})
         });
 
         const saveData = await saveResponse.json();

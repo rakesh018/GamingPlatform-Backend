@@ -25,7 +25,11 @@ const validateToken = async (req, res, next) => {
     req.phone=isBanned.phone;
     if (isBanned.isRestricted) {
       return res.status(403).json({ error: `ACCESS DENIED` });
-    } else {
+    } 
+    else if(isBanned.userType==="agent"){
+      return res.status(403).json({error:`Access denied for agent`});
+    }
+    else {
       next();
     }
   } catch (err) {

@@ -64,7 +64,7 @@ router.post(
         uid = generateUID(); //Above function which generates 7 length uid for each user
         uidExists = await User.exists({ uid });
       }
-      uid = `WM${uid}`;
+      uid = `AG${uid}`;
 
       // Check if user already exists within the database
       const savedUser = await User.findOne({ email }); // Await the promise

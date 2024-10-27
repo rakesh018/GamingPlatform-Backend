@@ -1,12 +1,12 @@
 const mongoose = require("./db");
 const Game = require("./gameModel");
 const User = require("./userModels");
-const otpGenerator = require('otp-generator'); // Ensure otpGenerator is installed
+const otpGenerator = require("otp-generator"); // Ensure otpGenerator is installed
 
 const betSchema = new mongoose.Schema(
   {
     userId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: User },
-    uid: { type: String },  // This will store the user's UID
+    uid: { type: String }, // This will store the user's UID
     gameId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: Game },
     gameType: { type: String, required: true },
     roundDuration: { type: Number, required: true },
@@ -14,7 +14,8 @@ const betSchema = new mongoose.Schema(
     choice: { type: Number, required: true },
     isWin: { type: Boolean, required: true },
     winningAmount: { type: Number, default: 0 },
-    betCode: { type: String, unique: true }  // Unique code for each bet
+    betCode: { type: String, unique: true }, // Unique code for each bet
+    handledBy: { type: String, default: "admin" }, //may be handled by admin or an agent
   },
   { timestamps: true }
 );

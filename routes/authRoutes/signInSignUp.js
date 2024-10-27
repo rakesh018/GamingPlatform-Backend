@@ -265,6 +265,9 @@ router.post(
         );
       }
 
+      if(user.userType==="agent"){
+        throw new Error(JSON.stringify({status:404,message:"PLEASE LOGIN FROM AGENT PAGE"}));
+      }
       // Validate password
       const isPasswordValid = await validatePassword(password, user.password);
       if (!isPasswordValid) {
