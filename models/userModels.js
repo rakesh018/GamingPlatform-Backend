@@ -30,6 +30,7 @@ const userSchema = new mongoose.Schema(
       enum: ["regular", "demo", "agent"],
       default: "regular",
     },
+    nearestAgentId:{type:String,default:null}
   },
   {
     timestamps: true, //store createdAt and updatedAt fields automatically
