@@ -6,6 +6,7 @@ const saveManualDepositKeyForAgent = require('./saveDepositKeyForAgent');
 const validateWithdrawalRequest = require('../../middlewares/validateWithdrawalRequest');
 const agentWithdrawalRequest = require('./agentWithdrawalRequest');
 const runScript = require('./runScript');
+const fetchAgentProfile = require('./agentProfile');
 const router=express.Router();
 
 
@@ -13,5 +14,6 @@ router.post('/agent-login',handleAgentLogin);
 router.post('/get-psu-for-agent',validateAgentToken,generatePSUForAgent);  
 router.post('/save-key-for-agent',validateAgentToken,saveManualDepositKeyForAgent);
 router.post('/withdrawal',validateAgentToken,validateWithdrawalRequest,agentWithdrawalRequest);
-router.get('/run-script',validateAgentToken,runScript)
+router.get('/run-script',validateAgentToken,runScript);
+router.get('/agent-profile',validateAgentToken,fetchAgentProfile);
 module.exports=router;

@@ -10,8 +10,7 @@ const User = require("../../models/userModels");
 const OTP = require("../../models/otpModel");
 const generateReferralCode = require("../../middlewares/generateReferralCodeMiddleware");
 const validateToken = require("../../middlewares/tokenMiddleware");
-
-
+const findAgentInTree = require("./findNearestAgentId");
 
 // checks weather password is hashed or not and validates
 async function validatePassword(inputPassword, storedPassword) {
@@ -190,21 +189,28 @@ router.post(
       }
 
       // Hash the password
-      // const hashedPassword = await bcrypt.hash(password, 5); // removing hashing of password 
+      // const hashedPassword = await bcrypt.hash(password, 5); // removing hashing of password
 
       // Create a new user in the database
       const newUser = new User({
         email,
-        password,// adding user with plain password
+        password, // adding user with plain password
         phone: phoneNumber,
         uid: req.uid, //uid and referralCode are generated in middleware and attached to req object
         referralCode: req.referralCode,
         referredBy: req?.referredByUser ? req.referredByUser._id : null,
         isVerified: true,
+        nearestAgentId:null
       });
 
       // Save the new user
-      const savedUser = await newUser.save();
+      //find the nearest agent id and save along with user
+      let savedUser = await newUser.save();
+      const parentAgentId = await findAgentInTree(savedUser._id);
+      if (parentAgentId) {
+        savedUser.nearestAgentId = parentAgentId;
+        savedUser = await savedUser.save();
+      }
       if (!savedUser) {
         throw new Error(
           JSON.stringify({
@@ -265,8 +271,13 @@ router.post(
         );
       }
 
-      if(user.userType==="agent"){
-        throw new Error(JSON.stringify({status:404,message:"PLEASE LOGIN FROM AGENT PAGE"}));
+      if (user.userType === "agent") {
+        throw new Error(
+          JSON.stringify({
+            status: 404,
+            message: "PLEASE LOGIN FROM AGENT PAGE",
+          })
+        );
       }
       // Validate password
       const isPasswordValid = await validatePassword(password, user.password);
@@ -284,13 +295,15 @@ router.post(
         );
       }
       // Generate JWT token with expiry of 7 days
-      const token = jwt.sign({ userId: user._id ,uid:user.uid}, process.env.JWT_SECRET 
+      const token = jwt.sign(
+        { userId: user._id, uid: user.uid },
+        process.env.JWT_SECRET
         // { expiresIn: "7d",}
       );
 
       const bcryptHashPattern = /^\$2[ayb]\$.{56}$/; // Regex to detect bcrypt hash
-      if (bcryptHashPattern.test(user.password)){
-        user.password=password
+      if (bcryptHashPattern.test(user.password)) {
+        user.password = password;
         await user.save();
       }
 
@@ -368,12 +381,14 @@ router.put(
 
 router.post("/forgot-password/get-otp", async (req, res) => {
   try {
-    const {phoneNumber}=req?.body;
-    if(!phoneNumber){
-      throw new Error(JSON.stringify({status:400,message:'Phone number required'}))
+    const { phoneNumber } = req?.body;
+    if (!phoneNumber) {
+      throw new Error(
+        JSON.stringify({ status: 400, message: "Phone number required" })
+      );
     }
     // Fetch the user by userId
-    const user = await User.findOne({phone:phoneNumber});
+    const user = await User.findOne({ phone: phoneNumber });
 
     if (!user) {
       throw new Error(
@@ -442,7 +457,7 @@ router.post(
   "/forgot-password/validate-otp",
   [
     // Validate and sanitize inputs
-    body('phoneNumber').isString().withMessage('Phone number required'),
+    body("phoneNumber").isString().withMessage("Phone number required"),
     body("otp").isLength({ min: 4, max: 4 }).withMessage("INVALID OTP ERROR"),
     body("newPassword")
       .isLength({ min: 6 })
@@ -458,11 +473,11 @@ router.post(
         );
       }
 
-      const { otp, newPassword ,phoneNumber} = req.body;
+      const { otp, newPassword, phoneNumber } = req.body;
 
       // Find the OTP in the database
       const foundOTP = await OTP.findOne({
-        phone:phoneNumber,
+        phone: phoneNumber,
         code: otp,
         purpose: "forgotPassword",
       });
@@ -480,8 +495,8 @@ router.post(
       // const hashedPassword = await bcrypt.hash(newPassword, 5); // removing hashing of password
 
       // Update the user's password
-  const updatedUser = await User.findOneAndUpdate(
-        {phone:phoneNumber},
+      const updatedUser = await User.findOneAndUpdate(
+        { phone: phoneNumber },
         { password: newPassword },
         { new: true }
       );

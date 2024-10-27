@@ -3,50 +3,6 @@ const Bet = require("../models/betModel");
 const User = require("../models/userModels");
 const redisConfig = require("../configs/redisConfig");
 
-const findAgentInTree=async(userId)=>{
-  //we can go max upto 3 levels in parent tree
-  let currentLevelDocument=await User.findOne({userId});
-  if(!currentLevelDocument.referredBy){
-    //there is no even immediate parent  
-    return "admin";
-  }
-  
-  for(let i=0;i<3;i++){
-    currentLevelDocument=await User.findOne({userId:currentLevelDocument.referredBy});
-    if(currentLevelDocument.userType==="agent"){
-      return currentLevelDocument._id;
-    }
-    else if(!currentLevelDocument.referredBy){
-      return "admin";
-    }
-  }
-  //go to first level (from reverse)
-  // const firstLevelDocument=await User.findOne({userId:currentLevelDocument.referredBy});
-  // if(firstLevelDocument.userType==="agent"){
-  //   return firstLevelDocument._id;
-  // }
-  // else if(!firstLevelDocument.referredBy){
-  //   return "admin";
-  // }
-
-  // //now we can move to second level
-  // const secondLevelDocument=await User.findOne({userId:firstLevelDocument.referredBy});
-  // if(secondLevelDocument.userType==="agent"){
-  //   return secondLevelDocument._id;
-  // }
-  // else if(!secondLevelDocument.referredBy){
-  //   return "admin";
-  // }
-
-  // //move to third level(from reverse)
-  // const thirdLevelDocument=await User.findOne({userId:secondLevelDocument.referredBy});
-  // if(thirdLevelDocument.userType==="agent"){
-  //   return thirdLevelDocument._id;
-  // }
-  // else if(!thirdLevelDocument.referredBy){
-  //   return "admin";
-  // }
-}
 // Define the payout processing function
 const processPayoutJob = async (job) => {
   const { gameId, userId, choice, result, betAmount, gameName, roundDuration } =job.data;
