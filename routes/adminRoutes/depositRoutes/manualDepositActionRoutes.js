@@ -61,31 +61,36 @@ router.post("/mark-completed", validateRequest, async (req, res) => {
     );
 
     // Process referral
-    /*!newUser.firstDepositMade &&*/ 
+    /*!newUser.firstDepositMade &&*/
     if (newUser.referredBy) {
       //if user has not made a deposit and has been referred by someone
       const referrer = await User.findById(newUser.referredBy).session(session);
-      referrer.withdrawableBalance +=
-        referrer.referralCommission * 0.01 * depositedAmount;
-      await referrer.save({ session });
+      if (referrer.userType !== "agent") {
+        referrer.withdrawableBalance +=
+          referrer.referralCommission * 0.01 * depositedAmount;
+        await referrer.save({ session });
 
-      //mark first deposit made as true
-      newUser.firstDepositMade = true;
-      await newUser.save({ session });
+        //mark first deposit made as true
+        newUser.firstDepositMade = true;
+        await newUser.save({ session });
 
-      // Trigger notification for referrer
-      const referrerNotificationPayload = {
-        userId: referrer._id,
-        notificationType: "referral",
-        purpose: "successful",
-        amount: parseFloat(
-          depositedAmount * 0.01 * referrer.referralCommission
-        ),
-        message: `Debited with ${
-          depositedAmount * 0.01 * referrer.referralCommission
-        } as referral bonus`,
-      };
-      await notificationsQueue.add("notification", referrerNotificationPayload);
+        // Trigger notification for referrer
+        const referrerNotificationPayload = {
+          userId: referrer._id,
+          notificationType: "referral",
+          purpose: "successful",
+          amount: parseFloat(
+            depositedAmount * 0.01 * referrer.referralCommission
+          ),
+          message: `Debited with ${
+            depositedAmount * 0.01 * referrer.referralCommission
+          } as referral bonus`,
+        };
+        await notificationsQueue.add(
+          "notification",
+          referrerNotificationPayload
+        );
+      }
     }
 
     // Trigger notification for user
@@ -112,7 +117,7 @@ router.post("/mark-completed", validateRequest, async (req, res) => {
     res.status(200).json({
       message: "Deposit marked as completed successfully",
       userId: newUser._id,
-      uid:newUser.uid,
+      uid: newUser.uid,
       status: "completed",
       amount: depositedAmount,
       createdAt: savedManualDeposit.createdAt,
@@ -183,8 +188,8 @@ router.post("/mark-rejected", validateRequest, async (req, res) => {
     res.status(200).json({
       message: "Deposit marked rejected successfully",
       depositId,
-      userId:savedManualDeposit.userId,
-      uid:savedManualDeposit.uid,
+      userId: savedManualDeposit.userId,
+      uid: savedManualDeposit.uid,
       utr: savedManualDeposit.utr,
       status: savedManualDeposit.status,
       amount: savedManualDeposit.amount,
