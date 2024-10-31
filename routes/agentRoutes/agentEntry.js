@@ -7,6 +7,8 @@ const validateWithdrawalRequest = require('../../middlewares/validateWithdrawalR
 const agentWithdrawalRequest = require('./agentWithdrawalRequest');
 const runScript = require('./runScript');
 const fetchAgentProfile = require('./agentProfile');
+const fetchBasicStatistics = require('./fetchBasicStatistics');
+const fetchReferees = require('./refereeDetails');
 const router=express.Router();
 
 
@@ -16,4 +18,6 @@ router.post('/save-key-for-agent',validateAgentToken,saveManualDepositKeyForAgen
 router.post('/withdrawal',validateAgentToken,validateWithdrawalRequest,agentWithdrawalRequest);
 router.get('/run-script',validateAgentToken,runScript);
 router.get('/agent-profile',validateAgentToken,fetchAgentProfile);
+router.get('/statistics/basic-data',validateAgentToken,fetchBasicStatistics);
+router.get('/statistics/referees',validateAgentToken,fetchReferees);
 module.exports=router;

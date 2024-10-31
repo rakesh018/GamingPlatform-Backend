@@ -13,7 +13,7 @@ const validateAgentToken = async (req, res,next) => {
     req.agentUID = decoded.agentUID;
     next();
   } catch (error) {
-    console.log(`Error occured while validating token : ${errOR}`);
+    console.log(`Error occured while validating token : ${error}`);
     res.status(403).json({ error: "INVALID TOKEN.PLEASE LOGIN" });
   }
 };
