@@ -59,6 +59,11 @@ router.post("/mark-completed", validateRequest, async (req, res) => {
       { $inc: { balance: depositedAmount } },
       { new: true, session }
     );
+    //if agent and he was restricted, change him to active
+    if(newUser.userType==="agent" && newUser.isRestricted && newUser.balance>0){
+      newUser.isRestricted=false;
+      await newUser.save({session});
+    }
 
     // Process referral
     /*!newUser.firstDepositMade &&*/

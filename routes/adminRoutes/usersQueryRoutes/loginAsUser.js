@@ -6,7 +6,7 @@ const loginAsUser = async (req, res) => {
   if (!userId || !uid) {
     res.status(400).json({ error: "Both uid and userId are required" });
   }
-  const foundUser = await User.findOne({ userId, uid });
+  const foundUser = await User.findOne({ _id:userId, uid });
   if (!foundUser) {
     return res
       .status(400)

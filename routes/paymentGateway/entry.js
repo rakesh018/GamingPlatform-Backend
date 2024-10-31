@@ -17,6 +17,6 @@ router.post("/webhook",webHook);
 router.post("/manual-payment/generate-psu",validateToken,generatePSU);
 router.post("/manual-payment/save-key",validateToken,saveManualDepositKey);
 router.post("/withdrawal-request",validateToken,validateWithdrawalRequest,withdrawalRequest);
-router.get("/get-upi-details",validateToken,getUpiDetails);
+router.get("/get-upi-details",getUpiDetails);
 
 module.exports = router;
