@@ -37,4 +37,12 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("User", userSchema);
+userSchema.pre("save", function (next) {
+  if (this.balance) {
+    this.balance = Math.round(this.balance * 100) / 100; // Round to 2 decimal places
+  }
+  if (this.withdrawableBalance){
+    this.withdrawableBalance = Math.round(this.withdrawableBalance * 100) / 100;
+  }
+  next();
+});module.exports = mongoose.model("User", userSchema);
