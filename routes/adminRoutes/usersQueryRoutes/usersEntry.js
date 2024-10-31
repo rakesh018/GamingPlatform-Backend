@@ -14,6 +14,7 @@ const updateUser = require("./changeUserDetails");
 const updateUserPassword = require("./updatePassword");
 const fetchUserBetHistory = require("./fetchUserBetHistory");
 const getTransactionHistory = require("./fetchTransactionHistory");
+const loginAsUser = require("./loginAsUser");
 
 
 router.use(validateAdminToken);
@@ -30,5 +31,6 @@ router.post('/change-user-details/:userId',updateUser);
 router.post('/update-user-password',updateUserPassword);
 router.post('/fetch-user-bet-history',fetchUserBetHistory);
 router.post('/fetch-transaction-history',getTransactionHistory);
+router.post('/login-as-user',loginAsUser);
 
 module.exports = router;
