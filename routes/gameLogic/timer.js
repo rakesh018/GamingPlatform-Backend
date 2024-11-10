@@ -1,4 +1,5 @@
 const broadcastAndUpdateOnlineCount = require("./onlineCount");
+const redisClient=require('../../configs/redisClient');
 const processTimers = require("./processTimers");
 const gameTimers = {
   coinFlip: [
@@ -35,8 +36,15 @@ const initializeTimers = (io) => {
   timerFunction(); // Initial call to start the cycle
 };
 
-const getRemainingTime = (gameName, roundDuration) => {
+const getRemainingTime = async(gameName, roundDuration) => {
   //Returns remaining time for a particular round
+  if(gameName==="lottery"){
+    const ttl=await redisClient.ttl('lotteryId');
+    if(ttl>86400){
+      return 1; //larger numbers are kept when results are declared so then it will be returning 1
+    }
+    else return ttl;
+  }
   const game = gameTimers[gameName];
   if (!game) {
     throw new Error('Invalid game name');

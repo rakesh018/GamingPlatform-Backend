@@ -59,6 +59,10 @@ app.use("/agent",agentRoutes);
 const scheduleLeaderboardUpdates = require("./workers/leaderBoardScheduler");
 scheduleLeaderboardUpdates();
 
+//Cron job to start the lottery daily
+const scheduleLottery=require('./workers/lotteryScheduler');
+scheduleLottery();
+
 //Cron jobs to timely update the analytics
 const scheduleAnalyticsUpdates = require("./workers/analyticsScheduler");
 scheduleAnalyticsUpdates();

@@ -8,6 +8,8 @@ const User = require("../../models/userModels");
 const redisClient = require("../../configs/redisClient");
 const otpGenerator = require("otp-generator");
 const { body, validationResult } = require("express-validator");
+const handleLotteryBet = require("./handleLotteryBet");
+const Bet = require("../../models/betModel");
 
 router.post(
   "/makeBet",
@@ -16,12 +18,12 @@ router.post(
     body("gameName")
       .notEmpty()
       .withMessage("Game name is required")
-      .isIn(["stockTrader", "coinFlip"])
+      .isIn(["stockTrader", "coinFlip", "lottery"])
       .withMessage("Invalid game name"),
     body("roundDuration")
       .notEmpty()
       .withMessage("Round duration is required")
-      .isIn([1, 3, 5, 10])
+      .isIn([1, 3, 5, 10, 1440])
       .withMessage("Invalid round duration"),
     body("betAmount")
       .notEmpty()
@@ -31,7 +33,7 @@ router.post(
     body("betChoice")
       .notEmpty()
       .withMessage("Bet choice is required")
-      .isIn(["head", "tail", "up", "down"])
+      .isIn(["head", "tail", "up", "down", "random"])
       .withMessage("Invalid bet choice"),
   ],
   validateBet,
@@ -39,24 +41,27 @@ router.post(
     //error management
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({error:errors.array()[0].msg});
+      return res.status(400).json({ error: errors.array()[0].msg });
     }
 
     let { gameName, roundDuration, betAmount, betChoice } = req.body;
-    if(betAmount<10){
-      return res.status(400).json('Minimum bet amount is 10');
+    if (betAmount < 10) {
+      return res.status(400).json("Minimum bet amount is 10");
     }
-    if(betAmount>300000){
-      return res.status(400).json('Maximum bet amount is 300000');
+    if (betAmount > 300000) {
+      return res.status(400).json("Maximum bet amount is 300000");
     }
     const userId = req.userId; // from token validation
+    if (gameName === "lottery") {
+      const output = await handleLotteryBet(req, betAmount);
+      return res.status(output.status).json(output.payload);
+    }
     const mappedChoice = mapChoice(gameName, betChoice);
     betAmount = parseFloat(betAmount);
     const queue = activeBets[gameName][roundDuration];
     const round = gameTimers[gameName].find(
       (r) => r.duration === roundDuration
     );
-
 
     // Start a session and transaction
     const session = await User.startSession();
@@ -189,24 +194,51 @@ router.get("/get-bet-slips", validateToken, async (req, res) => {
     res.status(500).json({ error: "INTERNAL SERVER ERROR" });
   }
 });
-router.get("/get-rounds-history/:gameName/:roundDuration", validateToken, async (req, res) => {
-  try {
-    const {gameName,roundDuration}=req.params;
-    if (!gameName || !roundDuration) {
-      res.json({ parsedResults: [] });
+router.get(
+  "/get-rounds-history/:gameName/:roundDuration",
+  validateToken,
+  async (req, res) => {
+    try {
+      const { gameName, roundDuration } = req.params;
+      if (!gameName || !roundDuration) {
+        res.json({ parsedResults: [] });
+      }
+      const key = `roundResults:${gameName}:${roundDuration}`;
+      const candlestickKey = `candlestickData:${gameName}:${roundDuration}`;
+      // Retrieve the latest 10 results from the list
+      const results = await redisClient.lRange(key, 0, 9);
+      const candlestickData = await redisClient.get(candlestickKey);
+      // Parse the results from JSON
+      const parsedResults = results.map((result) => JSON.parse(result));
+      const parsedCandleStickData = JSON.parse(candlestickData);
+      res.status(200).json({ parsedResults, parsedCandleStickData });
+    } catch (error) {
+      console.error(error);
+      res.json({ parsedResults: [], parsedCandleStickData: [] });
     }
-    const key = `roundResults:${gameName}:${roundDuration}`;
-    const candlestickKey = `candlestickData:${gameName}:${roundDuration}`;
-    // Retrieve the latest 10 results from the list
-    const results = await redisClient.lRange(key, 0, 9);
-    const candlestickData=await redisClient.get(candlestickKey);
-    // Parse the results from JSON
-    const parsedResults = results.map((result) => JSON.parse(result));
-    const parsedCandleStickData=JSON.parse(candlestickData);
-    res.status(200).json({ parsedResults,parsedCandleStickData });
+  }
+);
+router.get("/lottery-home", validateToken, async (req, res) => {
+  try {
+    //we will send current running slot starting number
+    //also send past details of lottery
+    const userId = req.userId;
+    let currentSlot = await redisClient.get("lotteriesBought");
+    currentSlot = JSON.parse(currentSlot);
+    let nearestHundred = Math.round(currentSlot / 100) * 100;
+    nearestHundred = nearestHundred + 1;
+    const ttl = await redisClient.ttl("lotteryId");
+    let lotteryId = await redisClient.get("lotteryId");
+    lotteryId = JSON.parse(lotteryId);
+
+    const lotteryBets = await Bet.find({ userId, gameType: "lottery" })
+      .sort({ createdAt: -1 }) // Sorts by `createdAt` in descending order
+      .limit(5);
+
+    res.json({ liveSlot:nearestHundred, ttl, lotteryBets });
   } catch (error) {
-    console.error(error)
-    res.json({ parsedResults: [],parsedCandleStickData:[] });
+    console.error(error);
+    res.status(500).json({ error: "INTERNAL SERVER ERROR" });
   }
 });
 module.exports = router;

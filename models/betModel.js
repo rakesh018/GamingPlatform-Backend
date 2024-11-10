@@ -16,6 +16,11 @@ const betSchema = new mongoose.Schema(
     winningAmount: { type: Number, default: 0 },
     betCode: { type: String, unique: true }, // Unique code for each bet
     handledBy: { type: String, default: "admin" }, //may be handled by admin or an agent
+    betStatus: {
+      type: String,
+      enum: ["pending", "completed"],
+      default: "completed",
+    },
   },
   { timestamps: true }
 );
