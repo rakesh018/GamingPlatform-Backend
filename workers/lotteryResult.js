@@ -27,7 +27,7 @@ const declareLotteryResult = async () => {
 
 const generateResult = async (totalLotteries, gameId) => {
   let resultArray = [];
-  let roundedHundred = Math.round(totalLotteries / 100) * 100;
+  let roundedHundred = Math.floor(totalLotteries / 100) * 100;
   if (roundedHundred === 0) {
     roundedHundred = 100;
   }

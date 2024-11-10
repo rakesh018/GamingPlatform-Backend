@@ -225,7 +225,7 @@ router.get("/lottery-home", validateToken, async (req, res) => {
     const userId = req.userId;
     let currentSlot = await redisClient.get("lotteriesBought");
     currentSlot = JSON.parse(currentSlot);
-    let nearestHundred = Math.round(currentSlot / 100) * 100;
+    let nearestHundred = Math.floor(currentSlot / 100) * 100;
     nearestHundred = nearestHundred + 1;
     const ttl = await redisClient.ttl("lotteryId");
     let lotteryId = await redisClient.get("lotteryId");
@@ -234,8 +234,9 @@ router.get("/lottery-home", validateToken, async (req, res) => {
     const lotteryBets = await Bet.find({ userId, gameType: "lottery" })
       .sort({ createdAt: -1 }) // Sorts by `createdAt` in descending order
       .limit(5);
-
-    res.json({ liveSlot:nearestHundred, ttl, lotteryBets });
+    
+    const highlightedBets=await Bet.find({userId,gameType:"lottery",betStatus:"pending",choice:{$gte:nearestHundred,$lte:nearestHundred+99}}).select("choice");
+    res.json({ liveSlot:nearestHundred, ttl, lotteryBets,highlightedBets });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "INTERNAL SERVER ERROR" });
