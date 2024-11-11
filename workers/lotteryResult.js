@@ -14,23 +14,21 @@ const declareLotteryResult = async () => {
       gameType: "lottery",
       result: 2,
     });
-    if(fetchedLottery){
+    if (fetchedLottery) {
       gameId = fetchedLottery._id;
       fetchedLottery.result = 0; //placeholder itself
       await fetchedLottery.save();
       await generateResult(totalLotteries, gameId);
     }
   } catch (error) {
-    console.error(`Error declaring lottery result : ${error}`)
+    console.error(`Error declaring lottery result : ${error}`);
   }
 };
 
 const generateResult = async (totalLotteries, gameId) => {
   let resultArray = [];
   let roundedHundred = Math.floor(totalLotteries / 100) * 100;
-  if (roundedHundred === 0) {
-    roundedHundred = 100;
-  }
+  roundedHundred = roundedHundred + 100;
   if (totalLotteries >= 10) {
     //declare first winner
     const firstWinner = randomBetweenOneAnd(roundedHundred);
@@ -82,7 +80,7 @@ const showResultInDatabase = async (ticket, price, gameId) => {
       if (!agent.isRestricted && agent.balance >= 0) {
         //agent must incur loss this time
         agent.balance -= price;
-        agent.balance -= 100; //we assumed all lost initially so remove that too
+        agent.balance -= 80; //we assumed all lost initially so remove that too
         if (agent.balance < 0) {
           agent.isRestricted = true;
         }

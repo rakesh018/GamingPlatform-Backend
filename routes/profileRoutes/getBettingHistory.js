@@ -8,7 +8,7 @@ const getBettingHistory = async (req, res) => {
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
-      .select("gameType roundDuration betAmount isWin createdAt winningAmount choice");
+      .select("gameType roundDuration betAmount isWin createdAt winningAmount choice betStatus");
 
     if (!paginatedBets) {
       throw new Error(
@@ -16,7 +16,7 @@ const getBettingHistory = async (req, res) => {
       );
     }
     if(paginatedBets.length===0){
-      throw new Error(JSON.stringify({status:400,message:"NO BETS FOUND"}))
+      throw new Error(JSON.stringify({status:400,message:"NO BETS FOUND"}));
     }
     const totalBets = await Bet.countDocuments({ userId: req.userId });
     if (!totalBets) {
