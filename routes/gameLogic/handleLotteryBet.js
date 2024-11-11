@@ -1,6 +1,7 @@
 const redisClient = require("../../configs/redisClient");
 const User = require("../../models/userModels");
 const Bet = require("../../models/betModel");
+const startLottery=require('../../workers/lotteryService');
 
 const handleLotteryBet = async (req, betAmount) => {
   const userId = req.userId;
@@ -23,8 +24,10 @@ const handleLotteryBet = async (req, betAmount) => {
     }
     let gameId = await redisClient.get("lotteryId");
     if(!gameId){
-      return {status:400,payload:{error:"Error buying lottery"}};
+      await startLottery();
+      // return {status:400,payload:{error:"Error buying lottery"}};
     }
+    gameId=await redisClient.get('lotteryId');
     gameId = JSON.parse(gameId);
     // Deduct from withdrawableBalance first, then from balance if needed
     let remainingAmount = betAmount;
