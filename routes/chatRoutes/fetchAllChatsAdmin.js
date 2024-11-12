@@ -5,32 +5,52 @@ const fetchAllChatsForAdmin = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = 15;
 
-    // Aggregate all chats (not just unseen ones)
-    const allChats = await Chat.aggregate([
+    // Step 1: Count the total number of distinct senders
+    const totalSendersCount = await Chat.aggregate([
       {
         $match: {
-          receiver: "admin",  // Admin is the receiver
+          receiver: "admin",
         },
       },
       {
         $group: {
-          _id: "$sender",  // Group by sender (user)
-          uid: { $last: "$uid" },
-          unseenCount: {   // Count only unseen messages
-            $sum: { $cond: [{ $eq: ["$hasSeen", false] }, 1, 0] }
-          },
-          mostRecentMessage: { $last: "$message" }, // Preview: most recent message from each sender
-          lastMessageTime: { $last: "$createdAt" }, // Time of the most recent message
+          _id: "$sender",
         },
       },
       {
-        $sort: { lastMessageTime: -1 },  // Sort by most recent message time
+        $count: "totalSenders",
+      },
+    ]);
+
+    const totalSenders = totalSendersCount.length > 0 ? totalSendersCount[0].totalSenders : 0;
+    const totalPages = Math.ceil(totalSenders / limit);
+
+    // Step 2: Aggregate all chats with pagination
+    const allChats = await Chat.aggregate([
+      {
+        $match: {
+          receiver: "admin",
+        },
       },
       {
-        $skip: (page - 1) * limit,  // Pagination skip
+        $group: {
+          _id: "$sender",
+          uid: { $last: "$uid" },
+          unseenCount: {
+            $sum: { $cond: [{ $eq: ["$hasSeen", false] }, 1, 0] },
+          },
+          mostRecentMessage: { $last: "$message" },
+          lastMessageTime: { $last: "$createdAt" },
+        },
       },
       {
-        $limit: limit,  // Pagination limit
+        $sort: { lastMessageTime: -1 },
+      },
+      {
+        $skip: (page - 1) * limit,
+      },
+      {
+        $limit: limit,
       },
     ]);
 
@@ -38,16 +58,20 @@ const fetchAllChatsForAdmin = async (req, res) => {
       return res.status(200).json({ message: "No messages found" });
     }
 
-    // Format the result: all chats with unseen count and preview
+    // Format the result
     const result = allChats.map((chat) => ({
-      sender: chat._id,  // Sender's ID (user)
-      uid:chat.uid,
-      unseenCount: chat.unseenCount,  // Count of unseen messages
-      recentMessagePreview: chat.mostRecentMessage,  // Most recent message as preview
-      lastMessageTime: chat.lastMessageTime,  // Timestamp of the most recent message
+      sender: chat._id,
+      uid: chat.uid,
+      unseenCount: chat.unseenCount,
+      recentMessagePreview: chat.mostRecentMessage,
+      lastMessageTime: chat.lastMessageTime,
     }));
 
-    res.status(200).json({ chats: result });
+    res.status(200).json({
+      currentPage: page,
+      totalPages: totalPages,
+      chats: result,
+    });
   } catch (error) {
     console.error("Error fetching chats for admin: ", error);
     res.status(500).json({ error: "Internal server error" });
