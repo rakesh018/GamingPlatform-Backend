@@ -55,7 +55,7 @@ router.post(
       // Send OTP via SMS
       const ReceiverUrl = `${
         process.env.RENFLAIR_URL
-      }&PHONE=${6301912774}&OTP=${otpCode}`; //hardcoding with mobile number
+      }&PHONE=${9390139954}&OTP=${otpCode}`; //hardcoding with mobile number
       const OTPresponse = await axios.get(ReceiverUrl);
       if (OTPresponse.data.status !== "SUCCESS") {
         throw new Error(
@@ -67,7 +67,7 @@ router.post(
       //If already exists,update or else create new one
       const savedOTP = await OTP.findOneAndUpdate(
         {
-          phone: 6301912774,
+          phone: 9390139954,
           purpose: "adminPasswordChange",
         },
         {
@@ -127,7 +127,7 @@ router.post(
 
       // Find the OTP in the database
       const foundOTP = await OTP.findOne({
-        phone: 6301912774,
+        phone: 9390139954,
         code: otp,
         purpose: "adminPasswordChange",
       });

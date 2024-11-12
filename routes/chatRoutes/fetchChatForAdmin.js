@@ -7,7 +7,7 @@ const fetchChatForAdmin = async (req, res) => {
       throw new Error(JSON.stringify({ message: "UserID not found" ,status:400}));
     }
     const { page = 1 } = req.query;
-    const limit = 15;
+    const limit = 30;
     const query = {
       $or: [{ sender: userId }, { receiver: userId }],
     };
