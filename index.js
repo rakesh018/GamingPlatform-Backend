@@ -17,7 +17,7 @@ const io = socketIo(server, {
     credentials: true,
   },
 });
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 
 // Enable CORS for Express
 app.use(cors());
